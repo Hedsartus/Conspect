@@ -47,9 +47,9 @@ public class EditAnswers extends AppCompatActivity {
 
         SwipeMenuListView listViewAnswer = findViewById(R.id.answerListView);
         listViewAnswer.setDivider(null);
-        this.adapter = new AnswerAdapter(this.db,this, this.question.getListAnswers(), listViewAnswer);
-        this.adapter.setQuestion(this.question);
-        listViewAnswer.setAdapter(this.adapter);
+        //this.adapter = new AnswerAdapter(this.db,this, this.question.getListAnswers(), listViewAnswer);
+        //t//his.adapter.setQuestion(this.question);
+        //listViewAnswer.setAdapter(this.adapter);
 
 
         FloatingActionButton btnAddAnswer = findViewById(R.id.btnAddAnswer);
