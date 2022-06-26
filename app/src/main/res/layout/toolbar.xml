@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentTop="true" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnToolbarLayout">
+
+        <Button
+            android:visibility="gone"
+            android:id="@+id/toolbarBtnBack"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:background="@android:drawable/ic_media_play"
+            android:textColor="#817A7A"
+            android:rotation="180"
+            android:textSize="20sp"
+            android:layout_alignParentStart="true"/>
+
+        <Button
+            android:visibility="gone"
+            android:id="@+id/toolbarBtnSave"
+            android:layout_width="60dp"
+            android:layout_height="40dp"
+            android:text="✔"
+            android:textSize="20sp"
+            android:textColor="#817A7A"
+            android:layout_alignParentEnd="true" />
+
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btnToolbarLayout">
+        <TextView
+            android:id="@+id/toolbarTextViewTitle"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_gravity="center_horizontal"
+            android:textAlignment="center"
+            android:text="Главная"
+            android:textSize="20sp"
+            android:textStyle="normal"/>
+
+    </LinearLayout>
+</RelativeLayout>

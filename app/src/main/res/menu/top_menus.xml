@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/top_menu_save"
+        android:icon="@drawable/diskette"
+        android:title="Edit"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/top_menu_test"
+        app:showAsAction="never"
+        android:title="Вопросы" />
+    <item
+        android:id="@+id/top_menu_audio"
+        app:showAsAction="never"
+        android:title="Добавить аудио" />
+    <item
+        android:id="@+id/top_menu_delete"
+        app:showAsAction="never"
+        android:title="Удалить карточку" />
+</menu>
