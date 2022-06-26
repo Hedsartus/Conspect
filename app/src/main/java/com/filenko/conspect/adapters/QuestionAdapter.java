@@ -2,30 +2,23 @@ package com.filenko.conspect.adapters;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.TextView;
 
 import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.filenko.conspect.R;
 import com.filenko.conspect.db.DataBaseConnection;
-import com.filenko.conspect.essence.Answer;
 import com.filenko.conspect.essence.Question;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class QuestionAdapter extends BaseAdapter {
     private DataBaseConnection db;

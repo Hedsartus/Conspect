@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.baoyz.swipemenulistview.SwipeMenuCreator;
 import com.baoyz.swipemenulistview.SwipeMenuItem;
@@ -17,7 +18,7 @@ import com.filenko.conspect.adapters.QuestionAdapter;
 import com.filenko.conspect.db.DataBaseConnection;
 
 public class EditQuestion extends AppCompatActivity {
-    private SwipeMenuListView listViewQuestion;
+    private RecyclerView listViewQuestion;
     private QuestionAdapter adapter;
     private int idNote;
 
@@ -36,8 +37,7 @@ public class EditQuestion extends AppCompatActivity {
         }
 
 
-        this.listViewQuestion = findViewById(R.id.questionsListView);
-        this.listViewQuestion.setDivider(null);
+        this.listViewQuestion = findViewById(R.id.rvQuestions);
         this.adapter = new QuestionAdapter(db,this, idNote, this.listViewQuestion);
         this.listViewQuestion.setAdapter(this.adapter);
 
