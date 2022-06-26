@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ToggleButton;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -194,10 +196,23 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
     public static class ViewHolder extends RecyclerView.ViewHolder {
         final EditText questionTitle;
         final RecyclerView recyclerViewSection;
+        final ToggleButton toggleButton;
+        final LinearLayout linearLayout;
         ViewHolder(View view){
             super(view);
             questionTitle = view.findViewById(R.id.item_question_title);
             recyclerViewSection = view.findViewById(R.id.rvAnswers);
+            toggleButton = view.findViewById(R.id.btnSetViewPanelAnswer);
+            linearLayout = view.findViewById(R.id.layoutRecyclerList);
+            linearLayout.setVisibility(View.GONE);
+
+            toggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    linearLayout.setVisibility(View.VISIBLE);
+                } else {
+                    linearLayout.setVisibility(View.GONE);
+                }
+            });
         }
     }
 }

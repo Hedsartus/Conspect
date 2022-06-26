@@ -44,14 +44,20 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
         <ToggleButton
+            android:id="@+id/btnSetViewPanelAnswer"
             android:layout_width="40dp"
             android:layout_height="40dp"
-
-            android:layout_gravity="right"/>
+            style="@style/toggleButton"
+            android:background="@drawable/ic_toggle_bg"
+            android:adjustViewBounds="true"
+            android:padding="3dp"
+            android:scaleType="fitCenter"
+            android:layout_gravity="left"/>
         <LinearLayout
+            android:id="@+id/layoutRecyclerList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical">
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvAnswers"
                     android:layout_width="match_parent"
@@ -63,6 +69,11 @@
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"/>
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:text="Добавить ответ" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

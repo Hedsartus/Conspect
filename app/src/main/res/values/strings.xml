@@ -3,4 +3,5 @@
     <string name="hintTitle">Заголовок</string>
     <string name="btnarroutexton"><![CDATA[>]]></string>
     <string name="btnarroutextoff"><![CDATA[<]]></string>
+    <string name="togglebtn"><![CDATA[>]]></string>
 </resources>
