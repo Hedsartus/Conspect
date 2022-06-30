@@ -150,7 +150,6 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         SQLiteDatabase database = this.db.getReadableDatabase();
         for(Question q : this.objects) {
             loadAnswers(q, database);
-            Log.d("TAG--------", q.getTitle());
         }
     }
 
