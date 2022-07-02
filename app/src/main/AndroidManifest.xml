@@ -28,7 +28,7 @@
             android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".activity.EditQuestion" />
         <activity android:name=".activity.EditAnswers" />
-        <activity android:name=".activity.ConspectTest" />
+        <activity android:name=".activity.ActivityTest" />
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

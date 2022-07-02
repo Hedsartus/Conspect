@@ -1,5 +1,6 @@
 package com.filenko.conspect;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.filenko.conspect.activity.ActivityTest;
 import com.filenko.conspect.activity.EditNode;
 import com.filenko.conspect.activity.EditNote;
 import com.filenko.conspect.adapters.NodeAdapter;
@@ -110,6 +112,7 @@ public class MainApplication extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, 1, 0, "Добавить каталог");
         menu.add(0, 2, 0, "Добавить карточку");
+        menu.add(0, 3, 0, "Тестирование");
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -144,6 +147,13 @@ public class MainApplication extends AppCompatActivity {
                             "Добавьте сначала каталог!", Toast.LENGTH_SHORT);
                     toast.show();
                 }
+                break;
+            case 3 :
+                intent = new Intent(this, ActivityTest.class);
+                b = new Bundle();
+                b.putInt("idnote", this.rootNote.getId());
+                intent.putExtras(b);
+                startActivity(intent);
                 break;
         }
 
