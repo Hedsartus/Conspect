@@ -9,7 +9,10 @@ import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.daimajia.swipe.SwipeLayout;
 import com.filenko.conspect.R;
 import com.filenko.conspect.adapters.QuestionAdapter;
 import com.filenko.conspect.db.DataBaseConnection;
@@ -18,6 +21,7 @@ public class EditQuestion extends AppCompatActivity {
     private RecyclerView listViewQuestion;
     private QuestionAdapter adapter;
     private int idNote;
+    private SwipeLayout sample1;
 
 
     @Override
@@ -35,11 +39,13 @@ public class EditQuestion extends AppCompatActivity {
 
 
         this.listViewQuestion = findViewById(R.id.rvQuestions);
+        this.listViewQuestion.setLayoutManager(new LinearLayoutManager(this));
         this.listViewQuestion.addItemDecoration(new DividerItemDecoration(this,
                 DividerItemDecoration.VERTICAL));
 
         this.adapter = new QuestionAdapter(db,this, idNote);
         this.listViewQuestion.setAdapter(this.adapter);
+
 
         /*
         listViewQuestion.setOnMenuItemClickListener((position, menu, index) -> {

@@ -11,11 +11,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ToggleButton;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.daimajia.swipe.SimpleSwipeListener;
+import com.daimajia.swipe.SwipeLayout;
+import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.filenko.conspect.R;
 import com.filenko.conspect.db.DataBaseConnection;
 import com.filenko.conspect.essence.Answer;
@@ -23,7 +28,38 @@ import com.filenko.conspect.essence.Question;
 
 import java.util.ArrayList;
 
-public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHolder> {
+public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHolder> {
+
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        final EditText questionTitle;
+        final RecyclerView recyclerViewSection;
+        final ToggleButton toggleButton;
+        final ImageView buttondelete;
+        final LinearLayout linearLayout;
+        SwipeLayout layoutQuestionItem;
+
+        ViewHolder(View view){
+            super(view);
+            questionTitle = view.findViewById(R.id.item_question_title);
+            recyclerViewSection = view.findViewById(R.id.rvAnswers);
+            toggleButton = view.findViewById(R.id.btnSetViewPanelAnswer);
+            buttondelete = view.findViewById(R.id.buttondelete);
+            layoutQuestionItem = view.findViewById(R.id.layoutQuestionItem);
+            linearLayout = view.findViewById(R.id.layoutRecyclerList);
+            linearLayout.setVisibility(View.GONE);
+
+            toggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    linearLayout.setVisibility(View.VISIBLE);
+                } else {
+                    linearLayout.setVisibility(View.GONE);
+                }
+            });
+
+        }
+    }
+
     private DataBaseConnection db;
     private Context ctx;
     private LayoutInflater lInflater;
@@ -194,6 +230,25 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         }else {
             holder.layoutQuestionItem.setBackgroundColor(Color.parseColor("#E9EBED"));
         }
+
+        holder.layoutQuestionItem.addSwipeListener(new SimpleSwipeListener() {
+            @Override
+            public void onOpen(SwipeLayout layout) {
+                //YoYo.with(Techniques.Tada).duration(500).delay(100).playOn(layout.findViewById(R.id.trash));
+            }
+        });
+        holder.layoutQuestionItem.setOnDoubleClickListener(new SwipeLayout.DoubleClickListener() {
+            @Override
+            public void onDoubleClick(SwipeLayout layout, boolean surface) {
+                //Toast.makeText(mContext, "DoubleClick", Toast.LENGTH_SHORT).show();
+            }
+        });
+        holder.buttondelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mItemManger.removeShownLayouts(holder.layoutQuestionItem);
+            }
+        });
     }
 
     @Override
@@ -201,29 +256,9 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         return objects.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        final EditText questionTitle;
-        final RecyclerView recyclerViewSection;
-        final ToggleButton toggleButton;
-        final LinearLayout linearLayout;
-        final LinearLayout layoutQuestionItem;
-        ViewHolder(View view){
-            super(view);
-            questionTitle = view.findViewById(R.id.item_question_title);
-            recyclerViewSection = view.findViewById(R.id.rvAnswers);
-            toggleButton = view.findViewById(R.id.btnSetViewPanelAnswer);
-            layoutQuestionItem = view.findViewById(R.id.layoutQuestionItem);
-            linearLayout = view.findViewById(R.id.layoutRecyclerList);
-            linearLayout.setVisibility(View.GONE);
-
-            toggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) {
-                    linearLayout.setVisibility(View.VISIBLE);
-                } else {
-                    linearLayout.setVisibility(View.GONE);
-                }
-            });
-
-        }
+    @Override
+    public int getSwipeLayoutResourceId(int position) {
+        return R.id.layoutQuestionItem;
     }
+
 }

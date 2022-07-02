@@ -9,9 +9,13 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.daimajia.swipe.SimpleSwipeListener;
+import com.daimajia.swipe.SwipeLayout;
+import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.filenko.conspect.R;
 import com.filenko.conspect.db.DataBaseConnection;
 import com.filenko.conspect.essence.Answer;
@@ -19,12 +23,30 @@ import com.filenko.conspect.essence.Question;
 
 import java.util.List;
 
-public class AnswerAdapter extends RecyclerView.Adapter<AnswerAdapter.ViewHolder> {
+public class AnswerAdapter extends RecyclerSwipeAdapter<AnswerAdapter.ViewHolder> {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        private Answer answer;
+        private SwipeLayout layoutAnswerItem;
+        final EditText answerTitle;
+        final CheckBox checkBox;
+        final ImageView buttondeleteanswer;
+
+        ViewHolder(View view, Answer answer){
+            super(view);
+            this.answer = answer;
+            layoutAnswerItem = view.findViewById(R.id.layoutAnswerItem);
+            checkBox = view.findViewById(R.id.checkboxAnswer);
+            answerTitle = view.findViewById(R.id.item_answer_text);
+            buttondeleteanswer = view.findViewById(R.id.buttonDeleteAnswer);
+        }
+    }
+
     private DataBaseConnection db;
     private Context ctx;
     private LayoutInflater lInflater;
     private List<Answer> objects;
     private Question question;
+
 
 
     public AnswerAdapter(DataBaseConnection db, Context ctx) {
@@ -40,16 +62,7 @@ public class AnswerAdapter extends RecyclerView.Adapter<AnswerAdapter.ViewHolder
     }
     /*
 
-    @Override
-    public Object getItem(int position) {
-        return this.objects.get(position);
-    }
 
-    @Override
-    public long getItemId(int position) {
-        Answer a = (Answer) getItem(position);
-        return a.getId();
-    }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -140,7 +153,10 @@ public class AnswerAdapter extends RecyclerView.Adapter<AnswerAdapter.ViewHolder
         Answer answer = objects.get(position);
         holder.answerTitle.setText(answer.getAnswer());
         holder.checkBox.setChecked(answer.isCorrect());
-        holder.button.setOnClickListener(new ButtonSaveClickListener(answer, holder));
+
+        holder.buttondeleteanswer.setOnClickListener(view -> {
+            mItemManger.removeShownLayouts(holder.layoutAnswerItem);
+        });
     }
 
     @Override
@@ -148,19 +164,12 @@ public class AnswerAdapter extends RecyclerView.Adapter<AnswerAdapter.ViewHolder
         return objects.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        private Answer answer;
-        final EditText answerTitle;
-        final CheckBox checkBox;
-        final ImageButton button;
-        ViewHolder(View view, Answer answer){
-            super(view);
-            this.answer = answer;
-            checkBox = view.findViewById(R.id.checkboxAnswer);
-            answerTitle = view.findViewById(R.id.item_answer_text);
-            button = view.findViewById(R.id.btnSaveAnswer);
-        }
+    @Override
+    public int getSwipeLayoutResourceId(int position) {
+        return R.id.layoutAnswerItem;
     }
+
+
 
     public class ButtonSaveClickListener implements View.OnClickListener {
         private final Answer answer;
@@ -175,8 +184,8 @@ public class AnswerAdapter extends RecyclerView.Adapter<AnswerAdapter.ViewHolder
             this.answer.setAnswer(holder.answerTitle.getText().toString());
             answer.setCorrect(holder.checkBox.isChecked());
             saveOrUpdateAnswer (answer);
-            holder.button.setEnabled(false);
-            holder.button.setImageAlpha(75);
+            holder.buttondeleteanswer.setEnabled(false);
+            holder.buttondeleteanswer.setImageAlpha(75);
         }
 
         private void saveOrUpdateAnswer (Answer answer) {
