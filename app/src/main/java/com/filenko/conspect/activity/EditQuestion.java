@@ -81,7 +81,7 @@ public class EditQuestion extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case 1 :
-                //this.adapter.addNewQuestion();
+                this.adapter.addNewQuestion();
             case 2 :
 
                 break;

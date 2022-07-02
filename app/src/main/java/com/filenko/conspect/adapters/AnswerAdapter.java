@@ -3,6 +3,8 @@ package com.filenko.conspect.adapters;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +15,6 @@ import android.widget.ImageView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.daimajia.swipe.SimpleSwipeListener;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.filenko.conspect.R;
@@ -24,168 +25,88 @@ import com.filenko.conspect.essence.Question;
 import java.util.List;
 
 public class AnswerAdapter extends RecyclerSwipeAdapter<AnswerAdapter.ViewHolder> {
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        private Answer answer;
-        private SwipeLayout layoutAnswerItem;
-        final EditText answerTitle;
-        final CheckBox checkBox;
-        final ImageView buttondeleteanswer;
-
-        ViewHolder(View view, Answer answer){
-            super(view);
-            this.answer = answer;
-            layoutAnswerItem = view.findViewById(R.id.layoutAnswerItem);
-            checkBox = view.findViewById(R.id.checkboxAnswer);
-            answerTitle = view.findViewById(R.id.item_answer_text);
-            buttondeleteanswer = view.findViewById(R.id.buttonDeleteAnswer);
-        }
-    }
-
     private DataBaseConnection db;
     private Context ctx;
     private LayoutInflater lInflater;
     private List<Answer> objects;
     private Question question;
 
-
-
-    public AnswerAdapter(DataBaseConnection db, Context ctx) {
-        this.db = db;
-        this.ctx = ctx;
-        this.lInflater = (LayoutInflater) this.ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    public void addNewAnswer() {
+        Answer answer = new Answer();
+        answer.setIdQuestion(question.getId());
+        this.objects.add(answer);
+        this.notifyDataSetChanged();
     }
 
-    public void setQuestion (Question question) {
-        this.question = question;
-        this.objects = question.getListAnswers();
-        notifyDataSetChanged();
-    }
-    /*
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        private Answer answer;
+        private SwipeLayout layoutAnswerItem;
+        final EditText answerTitle;
+        final CheckBox checkBox;
+        final ImageView buttondeleteanswer;
+        final ImageButton btnSaveAnswer;
 
+        ViewHolder(View view){
+            super(view);
+            //this.answer = answer;
+            layoutAnswerItem = view.findViewById(R.id.layoutAnswerItem);
+            checkBox = view.findViewById(R.id.checkboxAnswer);
+            answerTitle = view.findViewById(R.id.item_answer_text);
+            btnSaveAnswer = view.findViewById(R.id.btnSaveAnswer);
+            buttondeleteanswer = view.findViewById(R.id.buttonDeleteAnswer);
 
+            btnSaveAnswer.setOnClickListener(v-> {
+                if(this.answer!= null) {
+                    answer.setAnswer(answerTitle.getText().toString());
+                    answer.setCorrect(checkBox.isChecked());
+                    saveOrUpdateAnswer(answer);
+                    btnEnabled(btnSaveAnswer, false);
+                }
+            });
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView;
-        if (view == null) {
-            view = lInflater.inflate(R.layout.item_answer, parent, false);
+            answerTitle.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    btnEnabled(btnSaveAnswer, s.length() != 0);
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                }
+            });
+
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if(!answerTitle.getText().toString().equals("")) {
+                    btnEnabled(btnSaveAnswer, true);
+                } else {
+                    btnEnabled(btnSaveAnswer, false);
+                }
+            });
+
+            btnEnabled(btnSaveAnswer, false);
         }
 
-        ToggleButton btn = view.findViewById(R.id.btn_leftmenu);
-        btn.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                listViewAnswer.smoothOpenMenu(position);
-            } else {
-                listViewAnswer.smoothCloseMenu();
-            }
-        });
-
-
-        Answer answer = (Answer) getItem(position);
-        CheckBox cb = view.findViewById(R.id.checkboxAnswer);
-        cb.setChecked(answer.isCorrect());
-
-        EditText et = view.findViewById(R.id.item_answer_text);
-        et.setText(answer.getAnswer());
-
-        ImageButton btnsave = view.findViewById(R.id.btnSaveAnswer);
-
-        btnsave.setOnClickListener(v-> {
-            answer.setAnswer(et.getText().toString());
-            answer.setCorrect(cb.isChecked());
-            saveOrUpdateAnswer (answer);
-            btnEnabled(btnsave, false);
-        });
-
-        if(et.getText().toString().equals("")) {
-            btnEnabled(btnsave, false);
-        }
-
-        if(answer.getId() > 0) {
-            btnEnabled(btnsave, false);
-        }
-
-        et.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(s.length() != 0)
-                    btnEnabled(btnsave, true);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-
-        cb.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if(!et.getText().toString().equals("")) {
-                btnEnabled(btnsave, true);
-            } else {
-                btnEnabled(btnsave, false);
-            }
-        });
-
-        return view;
-    }
-
-    private void btnEnabled (ImageButton btn , boolean enb) {
-        if(enb) {
-            btn.setEnabled(true);
-            btn.setImageAlpha(255);
-        } else {
-            btn.setEnabled(false);
-            btn.setImageAlpha(75);
-        }
-    }*/
-
-    @Override
-    public AnswerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = this.lInflater.inflate(R.layout.item_answer, parent, false);
-        return new AnswerAdapter.ViewHolder(view, null);
-    }
-
-    @Override
-    public void onBindViewHolder(AnswerAdapter.ViewHolder holder, int position) {
-        Answer answer = objects.get(position);
-        holder.answerTitle.setText(answer.getAnswer());
-        holder.checkBox.setChecked(answer.isCorrect());
-
-        holder.buttondeleteanswer.setOnClickListener(view -> {
-            mItemManger.removeShownLayouts(holder.layoutAnswerItem);
-        });
-    }
-
-    @Override
-    public int getItemCount() {
-        return objects.size();
-    }
-
-    @Override
-    public int getSwipeLayoutResourceId(int position) {
-        return R.id.layoutAnswerItem;
-    }
-
-
-
-    public class ButtonSaveClickListener implements View.OnClickListener {
-        private final Answer answer;
-        private final AnswerAdapter.ViewHolder holder;
-        public ButtonSaveClickListener(Answer answer, AnswerAdapter.ViewHolder holder) {
+        public void setAnswer (Answer answer) {
             this.answer = answer;
-            this.holder = holder;
+            if(this.answer!= null) {
+                this.answerTitle.setText(this.answer.getAnswer());
+                this.checkBox.setChecked(this.answer.isCorrect());
+                btnEnabled (btnSaveAnswer, false);
+            }
         }
 
-        @Override
-        public void onClick(View v) {
-            this.answer.setAnswer(holder.answerTitle.getText().toString());
-            answer.setCorrect(holder.checkBox.isChecked());
-            saveOrUpdateAnswer (answer);
-            holder.buttondeleteanswer.setEnabled(false);
-            holder.buttondeleteanswer.setImageAlpha(75);
+        private void btnEnabled (ImageButton btn , boolean enb) {
+            if(enb) {
+                btn.setEnabled(true);
+                btn.setImageAlpha(255);
+            } else {
+                btn.setEnabled(false);
+                btn.setImageAlpha(75);
+            }
         }
 
         private void saveOrUpdateAnswer (Answer answer) {
@@ -207,4 +128,39 @@ public class AnswerAdapter extends RecyclerSwipeAdapter<AnswerAdapter.ViewHolder
         }
     }
 
+    public AnswerAdapter(DataBaseConnection db, Context ctx) {
+        this.db = db;
+        this.ctx = ctx;
+        this.lInflater = (LayoutInflater) this.ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
+
+    public void setQuestion (Question question) {
+        this.question = question;
+        this.objects = question.getListAnswers();
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public AnswerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = this.lInflater.inflate(R.layout.item_answer, parent, false);
+        return new AnswerAdapter.ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(AnswerAdapter.ViewHolder holder, int position) {
+        holder.setAnswer(objects.get(position));
+        holder.buttondeleteanswer.setOnClickListener(view -> {
+            //mItemManger.removeShownLayouts(holder.layoutAnswerItem);
+        });
+    }
+
+    @Override
+    public int getItemCount() {
+        return objects.size();
+    }
+
+    @Override
+    public int getSwipeLayoutResourceId(int position) {
+        return R.id.layoutAnswerItem;
+    }
 }

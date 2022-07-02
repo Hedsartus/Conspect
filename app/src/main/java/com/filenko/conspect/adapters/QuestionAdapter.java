@@ -1,19 +1,21 @@
 package com.filenko.conspect.adapters;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,22 +31,33 @@ import com.filenko.conspect.essence.Question;
 import java.util.ArrayList;
 
 public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHolder> {
+    private final DataBaseConnection db;
+    private final Context ctx;
+    private final LayoutInflater lInflater;
+    private final ArrayList<Question> objects = new ArrayList<>();
+    private final int idNote;
 
-
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        private Question question;
         final EditText questionTitle;
         final RecyclerView recyclerViewSection;
         final ToggleButton toggleButton;
         final ImageView buttondelete;
+        final ImageButton btnSaveQuestion;
         final LinearLayout linearLayout;
-        SwipeLayout layoutQuestionItem;
+        final TextView teCountAnswers;
+        final SwipeLayout layoutQuestionItem;
+        final Button addNewAnswer;
 
         ViewHolder(View view){
             super(view);
             questionTitle = view.findViewById(R.id.item_question_title);
+            btnSaveQuestion = view.findViewById(R.id.btnSaveQuestion);
+            teCountAnswers = view.findViewById(R.id.teCountAnswers);
             recyclerViewSection = view.findViewById(R.id.rvAnswers);
             toggleButton = view.findViewById(R.id.btnSetViewPanelAnswer);
-            buttondelete = view.findViewById(R.id.buttondelete);
+            buttondelete = view.findViewById(R.id.buttonDeleteQuestion);
+            addNewAnswer = view.findViewById(R.id.addNewAnswer);
             layoutQuestionItem = view.findViewById(R.id.layoutQuestionItem);
             linearLayout = view.findViewById(R.id.layoutRecyclerList);
             linearLayout.setVisibility(View.GONE);
@@ -57,14 +70,75 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
                 }
             });
 
+            btnSaveQuestion.setOnClickListener(v-> {
+                if(this.question!= null) {
+                    question.setTitle(questionTitle.getText().toString());
+                    saveOrUpdateQuestion (question);
+                    btnEnabled(btnSaveQuestion, false);
+                }
+            });
+
+            addNewAnswer.setOnClickListener(v-> {
+                AnswerAdapter adapter = (AnswerAdapter) recyclerViewSection.getAdapter();
+                adapter.addNewAnswer();
+                this.teCountAnswers.setText("Ответов: "+this.question.getListAnswers().size());
+            });
+
+            questionTitle.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if(s.length() != 0) {
+                        btnEnabled(btnSaveQuestion, true);
+                    } else {
+                        btnEnabled(btnSaveQuestion, false);
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                }
+            });
+
+        }
+
+        public void setQuestion (Question question) {
+            this.question = question;
+            this.questionTitle.setText(question.getTitle());
+            this.teCountAnswers.setText("Ответов: "+this.question.getListAnswers().size());
+            btnEnabled (btnSaveQuestion, false);
+        }
+
+        private void saveOrUpdateQuestion (Question question) {
+            SQLiteDatabase database = db.getWritableDatabase();
+
+            ContentValues dataValues = new ContentValues();
+            dataValues.put("idnote", question.getIdNote());
+            dataValues.put("title", question.getTitle());
+
+            if (question.getId() > 0) {
+                database.update("QUESTIONS", dataValues, "_id = ?",
+                        new String[]{String.valueOf(question.getId())});
+            } else {
+                question.setId((int) database.insert("QUESTIONS", null, dataValues));
+            }
+        }
+
+        private void btnEnabled (ImageButton btn , boolean enb) {
+            if(enb) {
+                btn.setEnabled(true);
+                btn.setImageAlpha(255);
+            } else {
+                btn.setEnabled(false);
+                btn.setImageAlpha(75);
+            }
         }
     }
 
-    private DataBaseConnection db;
-    private Context ctx;
-    private LayoutInflater lInflater;
-    private ArrayList<Question> objects = new ArrayList<>();
-    private int idNote;
+
 
     public QuestionAdapter(DataBaseConnection db, Context ctx, int idNote) {
         this.db = db;
@@ -78,6 +152,15 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
 
 
 /*
+
+
+    private boolean checkQuestion(String questionTitle) {
+        return !questionTitle.equals("");
+    }
+
+
+
+*/
     public void addNewQuestion () {
         Question q = new Question();
         q.setIdNote(this.idNote);
@@ -85,87 +168,6 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
         notifyDataSetChanged();
     }
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView;
-        if (view == null) {
-            view = lInflater.inflate(R.layout.item_question, parent, false);
-        }
-
-        Question question = (Question) getItem(position);
-        EditText et = view.findViewById(R.id.item_question_title);
-        et.setText(question.getTitle());
-
-        ImageButton btn = view.findViewById(R.id.btn);
-        btn.setOnClickListener(v -> {
-            listView.smoothOpenMenu(position);
-        });
-
-        ImageButton btnsave = view.findViewById(R.id.btnSaveQuestion);
-        btnsave.setOnClickListener(v-> {
-            question.setTitle(et.getText().toString());
-            saveOrUpdateQuestion (question);
-            btnEnabled(btnsave, false);
-        });
-
-        if(et.getText().toString().equals("")) {
-            btnEnabled(btnsave, false);
-        }
-
-        if(question.getId() > 0) {
-            btnEnabled(btnsave, false);
-        }
-
-        et.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(s.length() != 0)
-                    btnEnabled(btnsave, true);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-
-        return view;
-    }
-
-    private void saveOrUpdateQuestion (Question question) {
-        SQLiteDatabase database = this.db.getWritableDatabase();
-
-        ContentValues dataValues = new ContentValues();
-        dataValues.put("idnote", question.getIdNote());
-        dataValues.put("title", question.getTitle());
-
-        if (question.getId() > 0) {
-            database.update(
-                    "QUESTIONS", dataValues, "_id = ?",
-                    new String[]{String.valueOf(question.getId())});
-        } else {
-            question.setId((int) database.insert("QUESTIONS", null, dataValues));
-        }
-    }
-
-    private boolean checkQuestion(String questionTitle) {
-        return !questionTitle.equals("");
-    }
-
-
-    private void btnEnabled (ImageButton btn , boolean enb) {
-        if(enb) {
-            btn.setEnabled(true);
-            btn.setImageAlpha(255);
-        } else {
-            btn.setEnabled(false);
-            btn.setImageAlpha(75);
-        }
-    }
-*/
     public void loadQuestionData(int idNote) {
         this.objects.clear();
 
@@ -221,7 +223,7 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
     @Override
     public void onBindViewHolder(QuestionAdapter.ViewHolder holder, int position) {
         Question question = objects.get(position);
-        holder.questionTitle.setText(question.getTitle());
+        holder.setQuestion(question);
         AnswerAdapter answerAdapter = (AnswerAdapter) holder.recyclerViewSection.getAdapter();
         answerAdapter.setQuestion(question);
 
@@ -231,23 +233,8 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
             holder.layoutQuestionItem.setBackgroundColor(Color.parseColor("#E9EBED"));
         }
 
-        holder.layoutQuestionItem.addSwipeListener(new SimpleSwipeListener() {
-            @Override
-            public void onOpen(SwipeLayout layout) {
-                //YoYo.with(Techniques.Tada).duration(500).delay(100).playOn(layout.findViewById(R.id.trash));
-            }
-        });
-        holder.layoutQuestionItem.setOnDoubleClickListener(new SwipeLayout.DoubleClickListener() {
-            @Override
-            public void onDoubleClick(SwipeLayout layout, boolean surface) {
-                //Toast.makeText(mContext, "DoubleClick", Toast.LENGTH_SHORT).show();
-            }
-        });
-        holder.buttondelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mItemManger.removeShownLayouts(holder.layoutQuestionItem);
-            }
+        holder.buttondelete.setOnClickListener(view -> {
+            //mItemManger.removeShownLayouts(holder.layoutQuestionItem);
         });
     }
 
