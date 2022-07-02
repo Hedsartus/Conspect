@@ -3,6 +3,9 @@ package com.filenko.conspect.adapters;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -185,6 +188,12 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         holder.questionTitle.setText(question.getTitle());
         AnswerAdapter answerAdapter = (AnswerAdapter) holder.recyclerViewSection.getAdapter();
         answerAdapter.setQuestion(question);
+
+        if (position % 2 == 0){
+            holder.layoutQuestionItem.setBackgroundColor(Color.parseColor("#FFFFFF"));
+        }else {
+            holder.layoutQuestionItem.setBackgroundColor(Color.parseColor("#E9EBED"));
+        }
     }
 
     @Override
@@ -197,11 +206,13 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
         final RecyclerView recyclerViewSection;
         final ToggleButton toggleButton;
         final LinearLayout linearLayout;
+        final LinearLayout layoutQuestionItem;
         ViewHolder(View view){
             super(view);
             questionTitle = view.findViewById(R.id.item_question_title);
             recyclerViewSection = view.findViewById(R.id.rvAnswers);
             toggleButton = view.findViewById(R.id.btnSetViewPanelAnswer);
+            layoutQuestionItem = view.findViewById(R.id.layoutQuestionItem);
             linearLayout = view.findViewById(R.id.layoutRecyclerList);
             linearLayout.setVisibility(View.GONE);
 
@@ -212,6 +223,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.ViewHo
                     linearLayout.setVisibility(View.GONE);
                 }
             });
+
         }
     }
 }

@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
 import com.filenko.conspect.R;
 import com.filenko.conspect.adapters.QuestionAdapter;
@@ -34,6 +35,9 @@ public class EditQuestion extends AppCompatActivity {
 
 
         this.listViewQuestion = findViewById(R.id.rvQuestions);
+        this.listViewQuestion.addItemDecoration(new DividerItemDecoration(this,
+                DividerItemDecoration.VERTICAL));
+
         this.adapter = new QuestionAdapter(db,this, idNote);
         this.listViewQuestion.setAdapter(this.adapter);
 

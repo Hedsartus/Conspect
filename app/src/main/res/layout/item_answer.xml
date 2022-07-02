@@ -35,6 +35,18 @@
         android:background="@null"
         android:padding="7dp"
         android:scaleType="fitCenter"
+        android:layout_toLeftOf ="@+id/btnDeleteAnswer"
+        android:layout_centerInParent="true"
+        />
+    <ImageButton
+        android:id="@+id/btnDeleteAnswer"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/delete"
+        android:adjustViewBounds="true"
+        android:background="@null"
+        android:padding="7dp"
+        android:scaleType="fitCenter"
         android:layout_alignParentEnd="true"
         android:layout_centerInParent="true"
         />
