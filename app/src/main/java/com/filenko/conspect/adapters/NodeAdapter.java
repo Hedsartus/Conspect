@@ -79,7 +79,7 @@ public class NodeAdapter extends BaseAdapter {
             this.objects.clear();
 
             SQLiteDatabase database = this.db.getReadableDatabase();
-            try (Cursor query = database.rawQuery("SELECT * FROM NOTES WHERE parent = " + id + ";", null)) {
+            try (Cursor query = database.rawQuery("SELECT * FROM NOTES WHERE parent = " + id + " ORDER BY type;", null)) {
                 while (query.moveToNext()) {
                     this.objects.add(new Note(query.getInt(0),
                             query.getInt(1),
@@ -97,7 +97,7 @@ public class NodeAdapter extends BaseAdapter {
 
     public void getNodesFromDataBase () {
         SQLiteDatabase database = this.db.getReadableDatabase();
-        try (Cursor query = database.rawQuery("SELECT * FROM NOTES WHERE parent = 0;", null)) {
+        try (Cursor query = database.rawQuery("SELECT * FROM NOTES WHERE parent = 0 ORDER BY type;", null)) {
             while (query.moveToNext()) {
                 this.objects.add(new Note(query.getInt(0),
                         query.getInt(1),

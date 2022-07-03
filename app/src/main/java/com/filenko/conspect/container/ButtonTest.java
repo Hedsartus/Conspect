@@ -5,6 +5,7 @@ import com.filenko.conspect.essence.Answer;
 
 public class ButtonTest extends androidx.appcompat.widget.AppCompatButton {
     private Answer answer;
+    private boolean select = false;
 
     public ButtonTest(Context context, Answer answer) {
         super(context);
@@ -14,5 +15,13 @@ public class ButtonTest extends androidx.appcompat.widget.AppCompatButton {
 
     public boolean isCorrect () {
         return answer.isCorrect();
+    }
+
+    public boolean isSelectAnswer() {
+        return this.select;
+    }
+
+    public void setSelectedAnswer(boolean b) {
+        this.select = b;
     }
 }

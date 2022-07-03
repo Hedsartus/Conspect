@@ -5,9 +5,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -27,8 +30,12 @@ public class ActivityTest extends AppCompatActivity {
     private final List<Question> question = new ArrayList<>();
     private int count;
     private LinearLayout layoutAnswersbutton;
-    private ButtonTestClickListener buttonTestClickListener;
+    //private ButtonTestClickListener buttonTestClickListener;
     private Button btnNextQuestion;
+    private List<ButtonTest> buttonTestList = new ArrayList<>();
+    private int errorAnswer = 0;
+    private TextView tvTestQuestion;
+    private boolean isNext = false;
 
 
     @Override
@@ -39,11 +46,44 @@ public class ActivityTest extends AppCompatActivity {
         this.db = new DataBaseConnection(this);
         this.count = 0;
         this.layoutAnswersbutton = findViewById(R.id.createButtonAnswerLayout);
-        this.buttonTestClickListener = new ButtonTestClickListener();
+        this.tvTestQuestion = findViewById(R.id.tvTestQuestion);
+        //this.buttonTestClickListener = new ButtonTestClickListener();
         this.btnNextQuestion = findViewById(R.id.btnNextQuestion);
 
         this.btnNextQuestion.setOnClickListener(v -> {
-            
+            if(!isNext) {
+                setEnableButton(false);
+                for (ButtonTest bt : this.buttonTestList) {
+                    if (bt.isCorrect() && bt.isSelectAnswer()) {
+                        bt.setBackgroundColor(Color.GREEN);
+                    }
+                    if (bt.isCorrect() && !bt.isSelectAnswer()) {
+                        this.errorAnswer++;
+                    }
+                    if (!bt.isCorrect() && bt.isSelectAnswer()) {
+                        bt.setBackgroundColor(Color.RED);
+                        this.errorAnswer++;
+                    }
+                }
+                this.btnNextQuestion.setText("Дальше");
+            } else {
+                this.count++;
+
+                if(this.question.size() > this.count) {
+                    loadAnswers(this.question.get(count));
+                    setTitle("Вопрос "+this.count+1+" из " + this.question.size());
+                    setEnableButton(true);
+                    this.btnNextQuestion.setText("Проверить");
+                } else {
+                    Toast toast = Toast.makeText(getApplicationContext(),
+                            "Ошибок: "+this.errorAnswer+"!",
+                            Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                    this.btnNextQuestion.setVisibility(View.GONE);
+                }
+
+            }
         });
 
         Bundle bundle = getIntent().getExtras();
@@ -55,8 +95,18 @@ public class ActivityTest extends AppCompatActivity {
 
     }
 
+    private void setEnableButton (boolean b) {
+        for(ButtonTest bt : this.buttonTestList) {
+            bt.setEnabled(b);
+        }
+        this.isNext = !b;
+
+    }
+
     private void createAnswersButtons(Question question) {
         this.layoutAnswersbutton.removeAllViews();
+        this.buttonTestList.clear();
+        this.tvTestQuestion.setText(question.getTitle());
 
         switch (question.getType()) {
             case 1 : createMultipleButtons(question); break;
@@ -68,8 +118,9 @@ public class ActivityTest extends AppCompatActivity {
     private void createMultipleButtons(Question question) {
         for(Answer anr : question.getListAnswers()) {
             ButtonTest buttonTest = new ButtonTest(this, anr);
-            buttonTest.setOnClickListener(this.buttonTestClickListener);
+            buttonTest.setOnClickListener(new ButtonTestClickListener(question, this.buttonTestList));
             this.layoutAnswersbutton.addView(buttonTest);
+            this.buttonTestList.add(buttonTest);
         }
     }
 
@@ -91,8 +142,10 @@ public class ActivityTest extends AppCompatActivity {
                 this.layoutAnswersbutton.addView(buttonTest1);
                 this.layoutAnswersbutton.addView(buttonTest);
             }
-            buttonTest.setOnClickListener(this.buttonTestClickListener);
-            buttonTest1.setOnClickListener(this.buttonTestClickListener);
+            buttonTest.setOnClickListener(new ButtonTestClickListener(question, this.buttonTestList));
+            buttonTest1.setOnClickListener(new ButtonTestClickListener(question, this.buttonTestList));
+            this.buttonTestList.add(buttonTest);
+            this.buttonTestList.add(buttonTest1);
         }
 
 
@@ -151,7 +204,7 @@ public class ActivityTest extends AppCompatActivity {
                                 q.getString(3)));
             }
         } finally {
-            checkQuestionList(this.question);
+            //checkQuestionList(this.question);
             if(this.question.size()>0) {
                 Collections.shuffle(list);
                 loadAnswers(this.question.get(count));
@@ -181,15 +234,26 @@ public class ActivityTest extends AppCompatActivity {
     }
 
     class ButtonTestClickListener implements View.OnClickListener {
+        private Question question;
+        private List<ButtonTest> list;
+        public ButtonTestClickListener(Question question, List<ButtonTest> buttonTestList) {
+            this.question = question;
+            this.list = buttonTestList;
+        }
 
         @Override
         public void onClick(View v) {
-            ButtonTest bt = (ButtonTest) v;
-            if(bt.isCorrect()) {
-                bt.setBackgroundColor(Color.GREEN);
-            } else {
-                bt.setBackgroundColor(Color.RED);
+            if(question.getType() == 2) {
+                for(ButtonTest bt : this.list) {
+                    bt.setBackgroundColor(Color.GRAY);
+                    bt.setSelectedAnswer(false);
+                }
             }
+
+
+            ButtonTest bt = (ButtonTest) v;
+            bt.setBackgroundColor(Color.YELLOW);
+            bt.setSelectedAnswer(true);
         }
     }
 

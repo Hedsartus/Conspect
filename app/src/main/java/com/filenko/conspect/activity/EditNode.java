@@ -6,6 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,25 +21,18 @@ import com.filenko.conspect.db.DataBaseConnection;
 import com.filenko.conspect.essence.Note;
 
 public class EditNode extends AppCompatActivity {
-    private Note note = new Note();
+    private final Note note = new Note();
     private DataBaseConnection dbconn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(R.style.Theme_AppCompat_Light);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
         setContentView(R.layout.activity_edit_node);
+
         this.dbconn = new DataBaseConnection(this);
-        Button btnBack = findViewById(R.id.toolbarBtnBack);
-        btnBack.setVisibility(View.VISIBLE);
 
-        Button btnSaveUpdate = findViewById(R.id.toolbarBtnSave);
-        btnSaveUpdate.setVisibility(View.VISIBLE);
-
-        btnSaveUpdate.setOnClickListener(v -> {
-            viewToEssence ();
-            saveNewNode ();
-        });
 
         Bundle bundle = getIntent().getExtras();
         if(bundle!= null && bundle.getInt("key") > 0) {
@@ -50,10 +46,27 @@ public class EditNode extends AppCompatActivity {
             this.note.setParent(bundle.getInt("parent"));
         }
 
-        btnBack.setOnClickListener(v -> {
-            finish();
-        });
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.top_menus, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.top_menu_save:
+                viewToEssence ();
+                saveNewNode ();
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void saveNewNode () {
@@ -112,5 +125,11 @@ public class EditNode extends AppCompatActivity {
     private void setFields () {
         ((EditText)findViewById(R.id.nodesName)).setText(this.note.getName());
         ((EditText)findViewById(R.id.etDescription)).setText(this.note.getDescription());
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();  //или this.finish или что то свое
+        return true;
     }
 }

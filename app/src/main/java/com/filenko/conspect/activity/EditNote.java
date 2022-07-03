@@ -36,8 +36,8 @@ public class EditNote extends AppCompatActivity {
         setContentView(R.layout.activity_edit_note);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        Log.d("TTTTTEEEESSSSTTTT", " EditNote  onCreate(Bundle savedInstanceState) ");
-        mEditor = (RichEditor) findViewById(R.id.editor);
+
+        mEditor = findViewById(R.id.editor);
         mEditor.setEditorHeight(200);
         mEditor.setEditorFontSize(18);
         mEditor.setEditorFontColor(Color.DKGRAY);
