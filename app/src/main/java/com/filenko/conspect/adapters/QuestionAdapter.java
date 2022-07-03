@@ -16,6 +16,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -80,7 +81,19 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
 
             addNewAnswer.setOnClickListener(v-> {
                 AnswerAdapter adapter = (AnswerAdapter) recyclerViewSection.getAdapter();
-                adapter.addNewAnswer();
+
+                if(this.question.getType() == 2) {
+                    if(this.question.getListAnswers().size() == 0) {
+                        adapter.addNewAnswer();
+                    } else {
+                        Toast toast = Toast.makeText(this.recyclerViewSection.getContext(),
+                                "Нельзя добавить больше одного ответа в тип вопроса - верно или нет!",Toast.LENGTH_LONG);
+                        toast.show();
+                    }
+                } else {
+                    adapter.addNewAnswer();
+                }
+
                 this.teCountAnswers.setText("Ответов: "+this.question.getListAnswers().size());
             });
 
@@ -117,6 +130,7 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
 
             ContentValues dataValues = new ContentValues();
             dataValues.put("idnote", question.getIdNote());
+            dataValues.put("type", question.getType());
             dataValues.put("title", question.getTitle());
 
             if (question.getId() > 0) {
@@ -161,8 +175,9 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
 
 
 */
-    public void addNewQuestion () {
+    public void addNewQuestion (int type) {
         Question q = new Question();
+        q.setType(type);
         q.setIdNote(this.idNote);
         this.objects.add(q);
         notifyDataSetChanged();
@@ -179,7 +194,8 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
                         new Question(
                                 query.getInt(0),
                                 query.getInt(1),
-                                query.getString(2))
+                                query.getInt(2),
+                                query.getString(3))
                 );
             }
         } finally {
@@ -204,7 +220,7 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
                                 query.getInt(0),
                                 query.getInt(1),
                                 query.getString(2),
-                                query.getInt(3), false)
+                                query.getInt(3))
                 );
             }
 

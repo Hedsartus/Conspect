@@ -25,6 +25,7 @@ public class DataBaseConnection extends SQLiteOpenHelper {
 
         db.execSQL("CREATE TABLE QUESTIONS ("
                 + "_id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "type INTEGER  NOT NULL, "
                 + "idnote INTEGER  NOT NULL, "
                 + "title TEXT);");
 

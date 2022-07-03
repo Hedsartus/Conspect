@@ -33,6 +33,9 @@ public class AnswerAdapter extends RecyclerSwipeAdapter<AnswerAdapter.ViewHolder
 
     public void addNewAnswer() {
         Answer answer = new Answer();
+        if(this.question.getType() == 2) {
+            answer.setAnswer("Да / Нет");
+        }
         answer.setIdQuestion(question.getId());
         this.objects.add(answer);
         this.notifyDataSetChanged();
@@ -149,6 +152,9 @@ public class AnswerAdapter extends RecyclerSwipeAdapter<AnswerAdapter.ViewHolder
     @Override
     public void onBindViewHolder(AnswerAdapter.ViewHolder holder, int position) {
         holder.setAnswer(objects.get(position));
+
+        if(this.question.getType() == 2) holder.answerTitle.setEnabled(false);
+
         holder.buttondeleteanswer.setOnClickListener(view -> {
             //mItemManger.removeShownLayouts(holder.layoutAnswerItem);
         });

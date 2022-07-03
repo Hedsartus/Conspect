@@ -14,7 +14,6 @@ import com.filenko.conspect.adapters.QuestionAdapter;
 import com.filenko.conspect.db.DataBaseConnection;
 
 public class EditQuestion extends AppCompatActivity {
-    private RecyclerView listViewQuestion;
     private QuestionAdapter adapter;
     private int idNote;
 
@@ -33,19 +32,20 @@ public class EditQuestion extends AppCompatActivity {
         }
 
 
-        this.listViewQuestion = findViewById(R.id.rvQuestions);
-        this.listViewQuestion.setLayoutManager(new LinearLayoutManager(this));
-        this.listViewQuestion.addItemDecoration(new DividerItemDecoration(this,
+        RecyclerView listViewQuestion = findViewById(R.id.rvQuestions);
+        listViewQuestion.setLayoutManager(new LinearLayoutManager(this));
+        listViewQuestion.addItemDecoration(new DividerItemDecoration(this,
                 DividerItemDecoration.VERTICAL));
 
         this.adapter = new QuestionAdapter(db,this, idNote);
-        this.listViewQuestion.setAdapter(this.adapter);
+        listViewQuestion.setAdapter(this.adapter);
 
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, 1, 0, "+").setShowAsAction(1);
+        menu.add(0, 1, 0, "Добавить вопрос");
+        menu.add(0, 2, 0, "Добавить вопрос да/нет");
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -53,12 +53,12 @@ public class EditQuestion extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case 1 :
-                this.adapter.addNewQuestion();
+                this.adapter.addNewQuestion(1);
+                break;
             case 2 :
-
+                this.adapter.addNewQuestion(2);
                 break;
         }
-
         return super.onOptionsItemSelected(item);
     }
 

@@ -5,24 +5,31 @@ import java.util.List;
 
 public class Question {
     private int id;
+    private int type; // 1 - множественный, 2 - да/нет
     private int idNote;
     private String title;
     private final List<Answer> answers = new ArrayList<>();
 
-    public Question(int id, int idNote, String title) {
+    public Question(int id, int type, int idNote, String title) {
         this.id = id;
+        this.type = type;
         this.idNote = idNote;
         this.title = title;
     }
 
     public Question() {
         this.id = 0;
+        this.type = 1;
         this.idNote = 0;
         this.title = null;
     }
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 
     public void setIdNote(int idNote) {
@@ -35,6 +42,10 @@ public class Question {
 
     public int getId() {
         return id;
+    }
+
+    public int getType() {
+        return type;
     }
 
     public int getIdNote() {

@@ -1,21 +1,16 @@
 package com.filenko.conspect.essence;
 
-import android.text.Editable;
-
 public class Answer {
     private int id;
     private int idQuestion;
     private String answer;
     private boolean correct;
-    private boolean isnew;
 
-    public Answer(int id, int idQuestion, String answer, int correct, boolean isnew) {
+    public Answer(int id, int idQuestion, String answer, int correct) {
         this.id = id;
         this.idQuestion = idQuestion;
         this.answer = answer;
         this.correct = correct > 0;
-        this.isnew = isnew;
-
     }
 
     public Answer() {
@@ -41,10 +36,6 @@ public class Answer {
         this.correct = correct;
     }
 
-    public void setIsnew(boolean isnew) {
-        this.isnew = isnew;
-    }
-
     public int getId() {
         return id;
     }
@@ -59,9 +50,5 @@ public class Answer {
 
     public boolean isCorrect() {
         return correct;
-    }
-
-    public boolean isIsnew() {
-        return isnew;
     }
 }
