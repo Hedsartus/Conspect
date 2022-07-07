@@ -1,6 +1,8 @@
 package com.filenko.conspect.container;
 
 import android.content.Context;
+import android.graphics.Color;
+
 import com.filenko.conspect.essence.Answer;
 
 public class ButtonTest extends androidx.appcompat.widget.AppCompatButton {
@@ -11,6 +13,8 @@ public class ButtonTest extends androidx.appcompat.widget.AppCompatButton {
         super(context);
         this.answer = answer;
         setText(this.answer.getAnswer());
+        setBackgroundColor(Color.rgb(213, 213, 213)); // gray
+
     }
 
     public boolean isCorrect () {

@@ -30,17 +30,16 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp">
+            android:layout_margin="10dp">
             <EditText
                 android:id="@+id/item_question_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
-                android:background="@drawable/edittextbackground"
                 android:hint="Введите вопрос..."
                 android:inputType="textMultiLine"
                 android:textStyle="normal"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:padding="10dp"
                 android:layout_alignParentStart="true"
                 android:layout_centerInParent="true"
@@ -61,6 +60,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
                 android:orientation="vertical">
 
                 <RelativeLayout

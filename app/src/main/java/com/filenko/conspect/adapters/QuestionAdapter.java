@@ -130,7 +130,7 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
             this.teCountAnswers.setText("Ответов: "+this.question.getListAnswers().size());
 
             if(this.question.getType() == 2) {
-                btnEnabled (btnSaveQuestion, true);
+                btnEnabled (btnSaveQuestion, false);
             } else {
                 btnEnabled (btnSaveQuestion, false);
             }
@@ -254,11 +254,11 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
         AnswerAdapter answerAdapter = (AnswerAdapter) holder.recyclerViewSection.getAdapter();
         answerAdapter.setQuestion(question);
 
-        if (position % 2 == 0){
-            holder.layoutQuestionItem.setBackgroundColor(Color.parseColor("#FFFFFF"));
-        }else {
-            holder.layoutQuestionItem.setBackgroundColor(Color.parseColor("#E9EBED"));
-        }
+//        if (position % 2 == 0){
+//            holder.layoutQuestionItem.setBackgroundColor(Color.parseColor("#FFFFFF"));
+//        }else {
+//            holder.layoutQuestionItem.setBackgroundColor(Color.parseColor("#E9EBED"));
+//        }
 
         holder.buttondelete.setOnClickListener(view -> {
             //mItemManger.removeShownLayouts(holder.layoutQuestionItem);

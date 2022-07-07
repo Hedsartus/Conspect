@@ -30,12 +30,13 @@ public class ActivityTest extends AppCompatActivity {
     private final List<Question> question = new ArrayList<>();
     private int count;
     private LinearLayout layoutAnswersbutton;
-    //private ButtonTestClickListener buttonTestClickListener;
     private Button btnNextQuestion;
-    private List<ButtonTest> buttonTestList = new ArrayList<>();
+    private final List<ButtonTest> buttonTestList = new ArrayList<>();
     private int errorAnswer = 0;
     private TextView tvTestQuestion;
     private boolean isNext = false;
+    LinearLayout.LayoutParams layoutParams =
+            new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
 
     @Override
@@ -45,9 +46,10 @@ public class ActivityTest extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         this.db = new DataBaseConnection(this);
         this.count = 0;
+        layoutParams.setMargins(0, 0, 0, 7);
         this.layoutAnswersbutton = findViewById(R.id.createButtonAnswerLayout);
         this.tvTestQuestion = findViewById(R.id.tvTestQuestion);
-        //this.buttonTestClickListener = new ButtonTestClickListener();
+
         this.btnNextQuestion = findViewById(R.id.btnNextQuestion);
 
         this.btnNextQuestion.setOnClickListener(v -> {
@@ -55,13 +57,13 @@ public class ActivityTest extends AppCompatActivity {
                 setEnableButton(false);
                 for (ButtonTest bt : this.buttonTestList) {
                     if (bt.isCorrect() && bt.isSelectAnswer()) {
-                        bt.setBackgroundColor(Color.GREEN);
+                        bt.setBackgroundColor(Color.rgb(130, 202, 113)); //green
                     }
                     if (bt.isCorrect() && !bt.isSelectAnswer()) {
                         this.errorAnswer++;
                     }
                     if (!bt.isCorrect() && bt.isSelectAnswer()) {
-                        bt.setBackgroundColor(Color.RED);
+                        bt.setBackgroundColor(Color.rgb(243, 99, 113)); //red
                         this.errorAnswer++;
                     }
                 }
@@ -120,7 +122,7 @@ public class ActivityTest extends AppCompatActivity {
         for(Answer anr : question.getListAnswers()) {
             ButtonTest buttonTest = new ButtonTest(this, anr);
             buttonTest.setOnClickListener(new ButtonTestClickListener(question, this.buttonTestList));
-            this.layoutAnswersbutton.addView(buttonTest);
+            this.layoutAnswersbutton.addView(buttonTest, layoutParams);
             this.buttonTestList.add(buttonTest);
         }
     }
@@ -134,15 +136,15 @@ public class ActivityTest extends AppCompatActivity {
                 anr.setAnswer("Да");
                 buttonTest = new ButtonTest(this, anr);
                 buttonTest1 = new ButtonTest(this, new Answer(0, question.getId(), "Нет", 0));
-                this.layoutAnswersbutton.addView(buttonTest);
-                this.layoutAnswersbutton.addView(buttonTest1);
+                this.layoutAnswersbutton.addView(buttonTest, layoutParams);
+                this.layoutAnswersbutton.addView(buttonTest1, layoutParams);
             } else {
                 anr.setAnswer("Нет");
                 anr.setCorrect(true);
                 buttonTest1 = new ButtonTest(this, anr);
                 buttonTest = new ButtonTest(this, new Answer(0, question.getId(), "Да", 0));
-                this.layoutAnswersbutton.addView(buttonTest1);
-                this.layoutAnswersbutton.addView(buttonTest);
+                this.layoutAnswersbutton.addView(buttonTest1, layoutParams);
+                this.layoutAnswersbutton.addView(buttonTest, layoutParams);
             }
             buttonTest.setOnClickListener(new ButtonTestClickListener(question, this.buttonTestList));
             buttonTest1.setOnClickListener(new ButtonTestClickListener(question, this.buttonTestList));
@@ -182,17 +184,6 @@ public class ActivityTest extends AppCompatActivity {
     private void loadTree(int id) {
         SQLiteDatabase database = this.db.getReadableDatabase();
         List<Integer> list = new ArrayList<>();
-
-        /*
-        String sql = "WITH treenotes AS (SELECT _id, type, parent FROM NOTES " +
-                "WHERE _id = " + id +" "+
-                "UNION ALL " +
-                "SELECT n._id, n.type, n.parent FROM NOTES as n " +
-                "JOIN treenotes as tn " +
-                "ON n._id = tn.parent )" +
-                "SELECT * FROM treenotes WHERE type = 2";
-
-         */
 
         String sql = "SELECT * FROM QUESTIONS WHERE idnote IN ( " +
                 "WITH recursive " +
@@ -243,8 +234,8 @@ public class ActivityTest extends AppCompatActivity {
     }
 
     static class ButtonTestClickListener implements View.OnClickListener {
-        private Question question;
-        private List<ButtonTest> list;
+        private final Question question;
+        private final List<ButtonTest> list;
         public ButtonTestClickListener(Question question, List<ButtonTest> buttonTestList) {
             this.question = question;
             this.list = buttonTestList;
@@ -254,15 +245,25 @@ public class ActivityTest extends AppCompatActivity {
         public void onClick(View v) {
             if(question.getType() == 2) {
                 for(ButtonTest bt : this.list) {
-                    bt.setBackgroundColor(Color.GRAY);
+                    bt.setBackgroundColor(Color.rgb(213, 213, 213));
                     bt.setSelectedAnswer(false);
                 }
+
+                ButtonTest bt = (ButtonTest) v;
+                bt.setBackgroundColor(Color.rgb(252, 219, 170)); //yellow
+                bt.setSelectedAnswer(true);
             }
 
-
-            ButtonTest bt = (ButtonTest) v;
-            bt.setBackgroundColor(Color.YELLOW);
-            bt.setSelectedAnswer(true);
+            if(question.getType() == 1) {
+                ButtonTest bt = (ButtonTest) v;
+                if(bt.isSelectAnswer()) {
+                    bt.setBackgroundColor(Color.rgb(213, 213, 213)); // gray
+                    bt.setSelectedAnswer(false);
+                } else {
+                    bt.setBackgroundColor(Color.rgb(252, 219, 170)); //yellow
+                    bt.setSelectedAnswer(true);
+                }
+            }
         }
     }
 

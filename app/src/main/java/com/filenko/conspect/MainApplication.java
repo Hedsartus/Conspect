@@ -3,13 +3,16 @@ package com.filenko.conspect;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.filenko.conspect.activity.ActivityTest;
@@ -19,6 +22,13 @@ import com.filenko.conspect.adapters.NodeAdapter;
 import com.filenko.conspect.db.DataBaseConnection;
 import com.filenko.conspect.essence.Note;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Objects;
 
 public class MainApplication extends AppCompatActivity {
@@ -125,6 +135,7 @@ public class MainApplication extends AppCompatActivity {
         menu.add(0, 1, 0, "Добавить каталог");
         menu.add(0, 2, 0, "Добавить карточку");
         menu.add(0, 3, 0, "Тестирование");
+        menu.add(0, 4, 0, "Сделать копию БД");
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -137,6 +148,7 @@ public class MainApplication extends AppCompatActivity {
         - Проверяем есть ли у папки parent если нет, то нет возможности добавить карточку
         - Отправляем на Edit
      */
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
@@ -165,11 +177,42 @@ public class MainApplication extends AppCompatActivity {
                 }
                 break;
             case 3 :
+                this.rootNote.setParent(this.rootNote.getId());
                 intent = new Intent(this, ActivityTest.class);
                 b = new Bundle();
                 b.putInt("idnote", this.rootNote.getId());
                 intent.putExtras(b);
                 startActivity(intent);
+                break;
+            case 4 :
+
+                final String inFileName = this.getDatabasePath("nodebase").getAbsolutePath();
+                File dbFile = new File(inFileName);
+
+                try(FileInputStream fis = new FileInputStream(dbFile)) {
+
+                    String outFileName =
+                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) +
+                            "/database_copy.db";
+                    File destFile = new File(outFileName);
+                    // Open the empty db as the output stream
+                    OutputStream output = new FileOutputStream(destFile);
+
+                    // Transfer bytes from the inputfile to the outputfile
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = fis.read(buffer)) > 0) {
+                        output.write(buffer, 0, length);
+                    }
+
+                    output.flush();
+                    output.close();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
                 break;
         }
 

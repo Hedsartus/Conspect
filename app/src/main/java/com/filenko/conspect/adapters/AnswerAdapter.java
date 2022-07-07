@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.daimajia.swipe.SwipeLayout;
@@ -36,10 +37,11 @@ public class AnswerAdapter extends RecyclerSwipeAdapter<AnswerAdapter.ViewHolder
         Answer answer = new Answer();
         if(this.question.getType() == 2) {
             answer.setAnswer("Да / Нет");
+            answer.setCorrect(true);
         }
         answer.setIdQuestion(question.getId());
         this.objects.add(answer);
-        this.notifyDataSetChanged();
+        this.notifyItemInserted(this.objects.size());
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -83,11 +85,7 @@ public class AnswerAdapter extends RecyclerSwipeAdapter<AnswerAdapter.ViewHolder
             });
 
             checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if(!answerTitle.getText().toString().equals("")) {
-                    btnEnabled(btnSaveAnswer, true);
-                } else {
-                    btnEnabled(btnSaveAnswer, false);
-                }
+                btnEnabled(btnSaveAnswer, !answerTitle.getText().toString().equals(""));
             });
 
             btnEnabled(btnSaveAnswer, false);
