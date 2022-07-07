@@ -1,16 +1,13 @@
 package com.filenko.conspect;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,24 +19,25 @@ import com.filenko.conspect.adapters.NodeAdapter;
 import com.filenko.conspect.db.DataBaseConnection;
 import com.filenko.conspect.essence.Note;
 
+import java.util.Objects;
+
 public class MainApplication extends AppCompatActivity {
     private NodeAdapter adapter;
     private DataBaseConnection db;
     private Note rootNote;
-    private ListView listViewNode;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         this.db = new DataBaseConnection(this);
         this.rootNote = new Note();
-        this.listViewNode = findViewById(R.id.listViewNode);
+        ListView listViewNode = findViewById(R.id.listViewNode);
         this.adapter = new NodeAdapter(this.db, this, listViewNode);
-        this.listViewNode.setAdapter(this.adapter);
+        listViewNode.setAdapter(this.adapter);
 
         listViewNode.setOnItemClickListener((parent, view, position, id) -> {
             clickOnListView (position);
@@ -60,10 +58,12 @@ public class MainApplication extends AppCompatActivity {
         } else {
             this.rootNote.clear();
             this.adapter.getNodesFromDataBaseById(0);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(false);
             setTitle("Конспект");
         }
     }
+
+
 
     private void clickOnListView (int position) {
         this.rootNote = (Note)this.adapter.getItem(position);
@@ -77,22 +77,34 @@ public class MainApplication extends AppCompatActivity {
             startActivity(intent);
         } else {
             this.adapter.getNodesFromDataBaseById(rootNote.getId());
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
             setTitle(rootNote.getName());
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        Log.d("----------", "onActivityResult");
+//        Toast toast1 = Toast.makeText(this,
+//                "ВАЩЕ НЕ ПОНЯТНО!" , Toast.LENGTH_LONG);
+//        toast1.show();
+//
+//
+//        if (data != null){
+//            Toast toast = Toast.makeText(this,
+//                    "onActivityResult" , Toast.LENGTH_LONG);
+//            toast.show();
+//            int idParent = data.getIntExtra("key", 0);
+//            clickOnButtonBack(idParent);
+//        } else {
+//            Toast toast = Toast.makeText(this,
+//                    "ОШИБКА!!!" , Toast.LENGTH_LONG);
+//            toast.show();
+//        }
+//    }
 
-        if (data == null){
-            return;
-        }
-        int idParent = data.getIntExtra("key", 0);
-        clickOnButtonBack (idParent);
-    }
-
+    /** Get Note from database by id */
     private void getNoteFromDataBaseById (int id) {
         if(id > 0) {
             SQLiteDatabase database = this.db.getReadableDatabase();
@@ -118,30 +130,34 @@ public class MainApplication extends AppCompatActivity {
     }
 
 
-    //1. Если нажимаем добавить каталог
-    //- Отправляем на EditNode c параметром родителя
-    //2. Если нажимаем добавить карточку
-    //- Проверяем есть ли у папки parent если нет но ошибка
-    //- Отправляем на Edit
+    /**
+    1. Если нажимаем добавить каталог
+        - Отправляем на EditNode c параметром родителя
+    2. Если нажимаем добавить карточку
+        - Проверяем есть ли у папки parent если нет, то нет возможности добавить карточку
+        - Отправляем на Edit
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
         Bundle b;
         switch (item.getItemId()) {
             case 1 :
+                this.rootNote.setParent(this.rootNote.getId());
                 intent = new Intent(this, EditNode.class);
                 b = new Bundle();
                 b.putInt("parent", this.rootNote.getId());
                 intent.putExtras(b);
-                startActivityForResult(intent, 1);
+                startActivity(intent);
                 break;
             case 2 :
                 if(this.rootNote.getId()> 0) {
+                    this.rootNote.setParent(this.rootNote.getId());
                     intent = new Intent(this, EditNote.class);
                     b = new Bundle();
                     b.putInt("parent", this.rootNote.getId());
                     intent.putExtras(b);
-                    startActivityForResult(intent, 1);
+                    startActivity(intent);
                 } else {
                     Toast toast = Toast.makeText(this,
                             "Добавьте сначала каталог!", Toast.LENGTH_SHORT);
@@ -158,5 +174,11 @@ public class MainApplication extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        clickOnButtonBack (this.rootNote.getParent());
     }
 }

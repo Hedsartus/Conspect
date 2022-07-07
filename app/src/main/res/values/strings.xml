@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Conspect</string>
+    <string name="app_name">Конспект</string>
     <string name="hintTitle">Заголовок</string>
     <string name="btnarroutexton"><![CDATA[>]]></string>
     <string name="btnarroutextoff"><![CDATA[<]]></string>

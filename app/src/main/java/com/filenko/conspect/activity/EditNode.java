@@ -9,8 +9,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -20,6 +18,8 @@ import com.filenko.conspect.R;
 import com.filenko.conspect.db.DataBaseConnection;
 import com.filenko.conspect.essence.Note;
 
+import java.util.Objects;
+
 public class EditNode extends AppCompatActivity {
     private final Note note = new Note();
     private DataBaseConnection dbconn;
@@ -27,7 +27,7 @@ public class EditNode extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         setContentView(R.layout.activity_edit_node);
 
@@ -70,6 +70,7 @@ public class EditNode extends AppCompatActivity {
     }
 
     private void saveNewNode () {
+        String toastMsg;
         SQLiteDatabase database = this.dbconn.getWritableDatabase();
         ContentValues dataValues = new ContentValues();
         dataValues.put("type", 1);
@@ -79,17 +80,15 @@ public class EditNode extends AppCompatActivity {
         dataValues.put("html", "");
 
         if (note.getId() > 0) {
-            database.update(
-            "NOTES", dataValues, "_id = ?",
+            database.update("NOTES", dataValues, "_id = ?",
                     new String[]{String.valueOf(this.note.getId())});
+            toastMsg = "Каталог успешно обновлен!";
         } else {
             this.note.setId((int) database.insert("NOTES", null, dataValues));
+            toastMsg = this.note.getId()>0 ? "Каталог успешно добавлен!" :"Возникли проблемы!!!";
         }
-
-        Intent intent = new Intent();
-        intent.putExtra("key", this.note.getParent());
-        setResult(RESULT_OK, intent);
-        finish();
+        Toast toast = Toast.makeText(this,toastMsg, Toast.LENGTH_LONG);
+        toast.show();
     }
 
     private void viewToEssence () {

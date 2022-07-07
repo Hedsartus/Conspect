@@ -71,13 +71,13 @@ public class ActivityTest extends AppCompatActivity {
 
                 if(this.question.size() > this.count) {
                     loadAnswers(this.question.get(count));
-                    setTitle("Вопрос "+this.count+1+" из " + this.question.size());
+                    setTitle("Вопрос "+(this.count+1)+" из " + this.question.size());
                     setEnableButton(true);
                     this.btnNextQuestion.setText("Проверить");
                 } else {
                     Toast toast = Toast.makeText(getApplicationContext(),
                             "Ошибок: "+this.errorAnswer+"!",
-                            Toast.LENGTH_SHORT);
+                            Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.show();
                     this.btnNextQuestion.setVisibility(View.GONE);
@@ -116,6 +116,7 @@ public class ActivityTest extends AppCompatActivity {
     }
 
     private void createMultipleButtons(Question question) {
+        Collections.shuffle(question.getListAnswers());
         for(Answer anr : question.getListAnswers()) {
             ButtonTest buttonTest = new ButtonTest(this, anr);
             buttonTest.setOnClickListener(new ButtonTestClickListener(question, this.buttonTestList));
@@ -137,6 +138,7 @@ public class ActivityTest extends AppCompatActivity {
                 this.layoutAnswersbutton.addView(buttonTest1);
             } else {
                 anr.setAnswer("Нет");
+                anr.setCorrect(true);
                 buttonTest1 = new ButtonTest(this, anr);
                 buttonTest = new ButtonTest(this, new Answer(0, question.getId(), "Да", 0));
                 this.layoutAnswersbutton.addView(buttonTest1);
@@ -144,24 +146,31 @@ public class ActivityTest extends AppCompatActivity {
             }
             buttonTest.setOnClickListener(new ButtonTestClickListener(question, this.buttonTestList));
             buttonTest1.setOnClickListener(new ButtonTestClickListener(question, this.buttonTestList));
-            this.buttonTestList.add(buttonTest);
             this.buttonTestList.add(buttonTest1);
+            this.buttonTestList.add(buttonTest);
         }
 
 
     }
 
     private void checkQuestionList (List<Question> list) {
+        List<Question> errorQuestion = new ArrayList<>();
+
         for(Question q : list) {
             if(q.getListAnswers().size() < 1) {
-                list.remove(q);
-                continue;
+                errorQuestion.add(q);
             }
 
             if(q.getType() == 1 && q.getListAnswers().size() < 2) {
-                list.remove(q);
+                errorQuestion.add(q);
             }
         }
+
+        for(Question q : errorQuestion) {
+            list.remove(q);
+        }
+
+
     }
 
     @Override
@@ -233,7 +242,7 @@ public class ActivityTest extends AppCompatActivity {
         }
     }
 
-    class ButtonTestClickListener implements View.OnClickListener {
+    static class ButtonTestClickListener implements View.OnClickListener {
         private Question question;
         private List<ButtonTest> list;
         public ButtonTestClickListener(Question question, List<ButtonTest> buttonTestList) {

@@ -12,6 +12,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -51,7 +52,6 @@ public class AnswerAdapter extends RecyclerSwipeAdapter<AnswerAdapter.ViewHolder
 
         ViewHolder(View view){
             super(view);
-            //this.answer = answer;
             layoutAnswerItem = view.findViewById(R.id.layoutAnswerItem);
             checkBox = view.findViewById(R.id.checkboxAnswer);
             answerTitle = view.findViewById(R.id.item_answer_text);
@@ -113,19 +113,24 @@ public class AnswerAdapter extends RecyclerSwipeAdapter<AnswerAdapter.ViewHolder
         }
 
         private void saveOrUpdateAnswer (Answer answer) {
-            SQLiteDatabase database = db.getWritableDatabase();
+            if(answer.getAnswer().length() > 0) {
+                SQLiteDatabase database = db.getWritableDatabase();
 
-            int correct = answer.isCorrect()? 1:0;
-            ContentValues dataValues = new ContentValues();
-            dataValues.put("idquestion", this.answer.getIdQuestion());
-            dataValues.put("title", answer.getAnswer());
-            dataValues.put("correct", correct);
+                int correct = answer.isCorrect() ? 1 : 0;
+                ContentValues dataValues = new ContentValues();
+                dataValues.put("idquestion", this.answer.getIdQuestion());
+                dataValues.put("title", answer.getAnswer());
+                dataValues.put("correct", correct);
 
-            if (answer.getId() > 0) {
-                database.update("ANSWER", dataValues, "_id = ?",
-                        new String[]{String.valueOf(answer.getId())});
-            } else {
-                answer.setId((int) database.insert("ANSWER", null, dataValues));
+                if (answer.getId() > 0) {
+                    database.update("ANSWER", dataValues, "_id = ?",
+                            new String[]{String.valueOf(answer.getId())});
+                } else {
+                    answer.setId((int) database.insert("ANSWER", null, dataValues));
+                }
+            } else  {
+                Toast toast = Toast.makeText(ctx,"Нельзя сохранить пустой ответ!", Toast.LENGTH_LONG);
+                toast.show();
             }
 
         }

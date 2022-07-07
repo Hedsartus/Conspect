@@ -80,21 +80,27 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
             });
 
             addNewAnswer.setOnClickListener(v-> {
-                AnswerAdapter adapter = (AnswerAdapter) recyclerViewSection.getAdapter();
+                if(this.question.getId() != 0) {
+                    AnswerAdapter adapter = (AnswerAdapter) recyclerViewSection.getAdapter();
 
-                if(this.question.getType() == 2) {
-                    if(this.question.getListAnswers().size() == 0) {
-                        adapter.addNewAnswer();
+                    if (this.question.getType() == 2) {
+                        if (this.question.getListAnswers().size() == 0) {
+                            adapter.addNewAnswer();
+                        } else {
+                            Toast toast = Toast.makeText(this.recyclerViewSection.getContext(),
+                                    "Нельзя добавить больше одного ответа в тип вопроса - верно или нет!", Toast.LENGTH_LONG);
+                            toast.show();
+                        }
                     } else {
-                        Toast toast = Toast.makeText(this.recyclerViewSection.getContext(),
-                                "Нельзя добавить больше одного ответа в тип вопроса - верно или нет!",Toast.LENGTH_LONG);
-                        toast.show();
+                        adapter.addNewAnswer();
                     }
-                } else {
-                    adapter.addNewAnswer();
-                }
 
-                this.teCountAnswers.setText("Ответов: "+this.question.getListAnswers().size());
+                    this.teCountAnswers.setText("Ответов: " + this.question.getListAnswers().size());
+                } else {
+                    Toast toast = Toast.makeText(this.recyclerViewSection.getContext(),
+                            "Сначала сохраните вопрос!!!", Toast.LENGTH_LONG);
+                    toast.show();
+                }
             });
 
             questionTitle.addTextChangedListener(new TextWatcher() {
@@ -122,22 +128,34 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
             this.question = question;
             this.questionTitle.setText(question.getTitle());
             this.teCountAnswers.setText("Ответов: "+this.question.getListAnswers().size());
-            btnEnabled (btnSaveQuestion, false);
+
+            if(this.question.getType() == 2) {
+                btnEnabled (btnSaveQuestion, true);
+            } else {
+                btnEnabled (btnSaveQuestion, false);
+            }
+
         }
 
         private void saveOrUpdateQuestion (Question question) {
-            SQLiteDatabase database = db.getWritableDatabase();
+            if(checkQuestion(question.getTitle())) {
+                SQLiteDatabase database = db.getWritableDatabase();
 
-            ContentValues dataValues = new ContentValues();
-            dataValues.put("idnote", question.getIdNote());
-            dataValues.put("type", question.getType());
-            dataValues.put("title", question.getTitle());
+                ContentValues dataValues = new ContentValues();
+                dataValues.put("idnote", question.getIdNote());
+                dataValues.put("type", question.getType());
+                dataValues.put("title", question.getTitle());
 
-            if (question.getId() > 0) {
-                database.update("QUESTIONS", dataValues, "_id = ?",
-                        new String[]{String.valueOf(question.getId())});
+                if (question.getId() > 0) {
+                    database.update("QUESTIONS", dataValues, "_id = ?",
+                            new String[]{String.valueOf(question.getId())});
+                } else {
+                    question.setId((int) database.insert("QUESTIONS", null, dataValues));
+                }
             } else {
-                question.setId((int) database.insert("QUESTIONS", null, dataValues));
+                Toast toast = Toast.makeText(this.recyclerViewSection.getContext(),
+                        "Нельзя сохранить пустой вопрос!", Toast.LENGTH_LONG);
+                toast.show();
             }
         }
 
@@ -164,17 +182,10 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
 
     }
 
-
-/*
-
-
     private boolean checkQuestion(String questionTitle) {
-        return !questionTitle.equals("");
+        return questionTitle.length()>0;
     }
 
-
-
-*/
     public void addNewQuestion (int type) {
         Question q = new Question();
         q.setType(type);

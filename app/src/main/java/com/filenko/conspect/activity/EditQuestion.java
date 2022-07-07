@@ -13,6 +13,8 @@ import com.filenko.conspect.R;
 import com.filenko.conspect.adapters.QuestionAdapter;
 import com.filenko.conspect.db.DataBaseConnection;
 
+import java.util.Objects;
+
 public class EditQuestion extends AppCompatActivity {
     private QuestionAdapter adapter;
     private int idNote;
@@ -22,7 +24,7 @@ public class EditQuestion extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_question);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setTitle("Вопросы");
         DataBaseConnection db = new DataBaseConnection(this);
 
@@ -52,12 +54,8 @@ public class EditQuestion extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case 1 :
-                this.adapter.addNewQuestion(1);
-                break;
-            case 2 :
-                this.adapter.addNewQuestion(2);
-                break;
+            case 1 : this.adapter.addNewQuestion(1); break;
+            case 2 : this.adapter.addNewQuestion(2); break;
         }
         return super.onOptionsItemSelected(item);
     }

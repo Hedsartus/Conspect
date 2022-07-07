@@ -1,5 +1,6 @@
 package com.filenko.conspect.activity;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -7,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -20,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.filenko.conspect.R;
 import com.filenko.conspect.db.DataBaseConnection;
 import com.filenko.conspect.essence.Note;
+
+import java.util.Objects;
 
 import jp.wasabeef.richeditor.RichEditor;
 
@@ -34,7 +36,7 @@ public class EditNote extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_note);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         mEditor = findViewById(R.id.editor);
@@ -45,61 +47,20 @@ public class EditNote extends AppCompatActivity {
         mEditor.setPadding(10, 10, 10, 10);
         mEditor.setPlaceholder("Insert text here...");
 
-        findViewById(R.id.action_undo).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mEditor.undo();
-            }
-        });
+        findViewById(R.id.action_undo).setOnClickListener(v -> mEditor.undo());
+        findViewById(R.id.action_redo).setOnClickListener(v -> mEditor.redo());
 
-        findViewById(R.id.action_redo).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mEditor.redo();
-            }
-        });
+        findViewById(R.id.action_bold).setOnClickListener(v -> mEditor.setBold());
 
-        findViewById(R.id.action_bold).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mEditor.setBold();
-            }
-        });
+        findViewById(R.id.action_italic).setOnClickListener(v -> mEditor.setItalic());
 
-        findViewById(R.id.action_italic).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mEditor.setItalic();
-            }
-        });
+        findViewById(R.id.action_subscript).setOnClickListener(v -> mEditor.setSubscript());
 
-        findViewById(R.id.action_subscript).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mEditor.setSubscript();
-            }
-        });
+        findViewById(R.id.action_superscript).setOnClickListener(v -> mEditor.setSuperscript());
 
-        findViewById(R.id.action_superscript).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mEditor.setSuperscript();
-            }
-        });
+        findViewById(R.id.action_strikethrough).setOnClickListener(v -> mEditor.setStrikeThrough());
 
-        findViewById(R.id.action_strikethrough).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mEditor.setStrikeThrough();
-            }
-        });
-
-        findViewById(R.id.action_underline).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mEditor.setUnderline();
-            }
-        });
+        findViewById(R.id.action_underline).setOnClickListener(v -> mEditor.setUnderline());
 
         findViewById(R.id.action_txt_color).setOnClickListener(new View.OnClickListener() {
             private boolean isChanged;
@@ -122,18 +83,11 @@ public class EditNote extends AppCompatActivity {
         });
 
         findViewById(R.id.action_indent).setOnClickListener(v -> mEditor.setIndent());
-
         findViewById(R.id.action_outdent).setOnClickListener(v -> mEditor.setOutdent());
-
         findViewById(R.id.action_align_left).setOnClickListener(v -> mEditor.setAlignLeft());
-
         findViewById(R.id.action_align_center).setOnClickListener(v -> mEditor.setAlignCenter());
-
         findViewById(R.id.action_align_right).setOnClickListener(v -> mEditor.setAlignRight());
-
-
         findViewById(R.id.action_insert_bullets).setOnClickListener(v -> mEditor.setBullets());
-
         findViewById(R.id.action_insert_numbers).setOnClickListener(v -> mEditor.setNumbers());
 
 
@@ -156,7 +110,7 @@ public class EditNote extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();  //или this.finish или что то свое
+        onBackPressed();
         return true;
     }
 
@@ -174,7 +128,8 @@ public class EditNote extends AppCompatActivity {
             case R.id.top_menu_save:
                 viewToEssence ();
                 saveNewNode ();
-            case R.id.top_menu_test :
+                break;
+            case R.id.top_menu_question:
                 Intent intent = new Intent(this, EditQuestion.class);
                 Bundle b = new Bundle();
                 b.putInt("idnote", this.note.getId());
@@ -187,18 +142,9 @@ public class EditNote extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (data == null){
-            return;
-        }
-
-
-    }
-
     private void saveNewNode () {
+        String toastMsg;
+
         SQLiteDatabase database = this.dbconn.getWritableDatabase();
         ContentValues dataValues = new ContentValues();
         dataValues.put("type", 2);
@@ -208,17 +154,15 @@ public class EditNote extends AppCompatActivity {
         dataValues.put("html", this.note.getHtml());
 
         if (note.getId() > 0) {
-            database.update(
-                    "NOTES", dataValues, "_id = ?",
+            database.update("NOTES", dataValues, "_id = ?",
                     new String[]{String.valueOf(this.note.getId())});
+            toastMsg = "Карточка успешно обновлена!";
         } else {
             this.note.setId((int) database.insert("NOTES", null, dataValues));
+            toastMsg = this.note.getId()>0 ? "Карточка успешно добавлена!" :"Возникли проблемы!!!";
         }
-
-        Intent intent = new Intent();
-        intent.putExtra("key", this.note.getParent());
-        setResult(RESULT_OK, intent);
-        finish();
+        Toast toast = Toast.makeText(this,toastMsg, Toast.LENGTH_LONG);
+        toast.show();
     }
 
     private void viewToEssence () {
@@ -244,7 +188,7 @@ public class EditNote extends AppCompatActivity {
             db.close();
 
         } catch(SQLiteException e) {
-            Toast toast = Toast.makeText(this, "Database unavailable - fillDataLinkWords - ", Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(this, "Database unavailable ", Toast.LENGTH_SHORT);
             toast.show();
         }
     }
