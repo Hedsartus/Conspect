@@ -44,8 +44,8 @@
                 android:inputType="textMultiLine"
                 android:textStyle="normal"
                 android:textSize="16sp"
-                android:layout_toRightOf="@+id/checkboxAnswer"
-                android:layout_toLeftOf="@+id/btnSaveAnswer"
+                android:layout_toEndOf="@+id/checkboxAnswer"
+                android:layout_toStartOf="@+id/btnSaveAnswer"
                 android:layout_centerVertical="true"/>
             <ImageButton
                 android:id="@+id/btnSaveAnswer"

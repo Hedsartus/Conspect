@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.daimajia.swipe.SwipeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:id="@+id/swipeLayoutNote">
+
+    <LinearLayout
+        android:tag="Bottom4"
+        android:id="@+id/bottom_wrapper_2"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+        <ImageView
+            android:id="@+id/buttonEditSwipe"
+            android:src="@android:drawable/ic_menu_edit"
+            android:layout_width="70dp"
+            android:background="@color/colorPrimary"
+            android:paddingLeft="25dp"
+            android:paddingRight="25dp"
+            android:layout_height="match_parent" />
+
+        <ImageView
+            android:id="@+id/buttonDeleteSwipe"
+            android:src="@drawable/delete"
+            android:layout_width="70dp"
+            android:background="@color/colorPrimary"
+            android:paddingLeft="25dp"
+            android:paddingRight="25dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/layoutView">
+
+        <ImageView
+            android:id="@+id/item_image_view_icon"
+            android:src="@drawable/directory1"
+            android:adjustViewBounds="true"
+            android:padding="7dp"
+            android:scaleType="fitCenter"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentStart="true"/>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutTag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_toEndOf="@+id/item_image_view_icon"
+            android:layout_toStartOf="@+id/sizeChild"
+            android:paddingStart="10dp"
+            tools:ignore="RtlSymmetry">
+            <TextView
+                android:id="@+id/noteName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="name"
+                android:textStyle="normal"
+                android:textSize="16sp">
+            </TextView>
+            <TextView
+                android:id="@+id/noteDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:textStyle="italic"
+                android:text="description">
+            </TextView>
+        </LinearLayout>
+        <TextView
+            android:id="@+id/sizeChild"
+            android:padding="7dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:textSize="16sp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"/>
+    </RelativeLayout>
+</com.daimajia.swipe.SwipeLayout>

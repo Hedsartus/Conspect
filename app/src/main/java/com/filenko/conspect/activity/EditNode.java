@@ -1,7 +1,6 @@
 package com.filenko.conspect.activity;
 
 import android.content.ContentValues;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -36,7 +35,7 @@ public class EditNode extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
         if(bundle!= null && bundle.getInt("key") > 0) {
-            int idNote = (Integer)bundle.getSerializable(Integer.class.getSimpleName());
+            int idNote = bundle.getInt("key");
             if(idNote>=0) {
                 this.note.setId(idNote);
                 getDataFromDatabase (this.note.getId());
@@ -128,7 +127,7 @@ public class EditNode extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();  //или this.finish или что то свое
+        onBackPressed();
         return true;
     }
 }

@@ -3,21 +3,20 @@ package com.filenko.conspect;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ListView;
 import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.filenko.conspect.activity.ActivityTest;
 import com.filenko.conspect.activity.EditNode;
 import com.filenko.conspect.activity.EditNote;
-import com.filenko.conspect.adapters.NodeAdapter;
+import com.filenko.conspect.adapters.NoteRecyclerViewAdapter;
 import com.filenko.conspect.db.DataBaseConnection;
 import com.filenko.conspect.essence.Note;
 
@@ -30,10 +29,10 @@ import java.io.OutputStream;
 import java.util.Objects;
 
 public class MainApplication extends AppCompatActivity {
-    private NodeAdapter adapter;
     private DataBaseConnection db;
+    private NoteRecyclerViewAdapter adapter;
     private Note rootNote;
-
+    private boolean onstop = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +42,18 @@ public class MainApplication extends AppCompatActivity {
 
         this.db = new DataBaseConnection(this);
         this.rootNote = new Note();
-        ListView listViewNode = findViewById(R.id.listViewNode);
-        this.adapter = new NodeAdapter(this.db, this, listViewNode);
-        listViewNode.setAdapter(this.adapter);
 
-        listViewNode.setOnItemClickListener((parent, view, position, id) -> {
+        RecyclerView listViewNote = findViewById(R.id.listViewNote);
+        listViewNote.setLayoutManager(new LinearLayoutManager(this));
+
+        this.adapter = new NoteRecyclerViewAdapter(db,this);
+        listViewNote.setAdapter(this.adapter);
+
+
+        this.adapter.setOnClickListener((view, position) -> {
             clickOnListView (position);
         });
+
     }
 
     @Override
@@ -60,57 +64,34 @@ public class MainApplication extends AppCompatActivity {
 
     private void clickOnButtonBack (int idParent) {
         if(idParent> 0) {
-            this.adapter.getNodesFromDataBaseById(idParent);
+            this.adapter.getNodesFromDataBaseByIdPrent(idParent);
             getNoteFromDataBaseById(idParent);
             setTitle(this.rootNote.getName());
         } else {
             this.rootNote.clear();
-            this.adapter.getNodesFromDataBaseById(0);
+            this.adapter.getNodesFromDataBaseByIdPrent(0);
             Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(false);
             setTitle("Конспект");
         }
     }
 
-
-
     private void clickOnListView (int position) {
-        this.rootNote = (Note)this.adapter.getItem(position);
+        Note note = this.adapter.getItem(position);
         //1. Если нажимаю на папку - значит адаптер апдейт
         //2. Если нажимаю на заметку - значит открыть EditNote передать ID note
-        if(rootNote.getType() == 2) {
+        if(note.getType() == 2) {
             Intent intent = new Intent(this, EditNote.class);
             Bundle b = new Bundle();
-            b.putInt("key", this.rootNote.getId());
+            b.putInt("key", note.getId());
             intent.putExtras(b);
             startActivity(intent);
         } else {
-            this.adapter.getNodesFromDataBaseById(rootNote.getId());
+            this.adapter.getNodesFromDataBaseByIdPrent(note.getId());
+            this.rootNote = note;
             Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
             setTitle(rootNote.getName());
         }
     }
-
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        Log.d("----------", "onActivityResult");
-//        Toast toast1 = Toast.makeText(this,
-//                "ВАЩЕ НЕ ПОНЯТНО!" , Toast.LENGTH_LONG);
-//        toast1.show();
-//
-//
-//        if (data != null){
-//            Toast toast = Toast.makeText(this,
-//                    "onActivityResult" , Toast.LENGTH_LONG);
-//            toast.show();
-//            int idParent = data.getIntExtra("key", 0);
-//            clickOnButtonBack(idParent);
-//        } else {
-//            Toast toast = Toast.makeText(this,
-//                    "ОШИБКА!!!" , Toast.LENGTH_LONG);
-//            toast.show();
-//        }
-//    }
 
     /** Get Note from database by id */
     private void getNoteFromDataBaseById (int id) {
@@ -146,14 +127,13 @@ public class MainApplication extends AppCompatActivity {
         - Проверяем есть ли у папки parent если нет, то нет возможности добавить карточку
         - Отправляем на Edit
      */
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
         Bundle b;
         switch (item.getItemId()) {
             case 1 :
-                this.rootNote.setParent(this.rootNote.getId());
+                //this.rootNote.setParent(this.rootNote.getId());
                 intent = new Intent(this, EditNode.class);
                 b = new Bundle();
                 b.putInt("parent", this.rootNote.getId());
@@ -162,7 +142,7 @@ public class MainApplication extends AppCompatActivity {
                 break;
             case 2 :
                 if(this.rootNote.getId()> 0) {
-                    this.rootNote.setParent(this.rootNote.getId());
+                    //this.rootNote.setParent(this.rootNote.getId());
                     intent = new Intent(this, EditNote.class);
                     b = new Bundle();
                     b.putInt("parent", this.rootNote.getId());
@@ -175,7 +155,7 @@ public class MainApplication extends AppCompatActivity {
                 }
                 break;
             case 3 :
-                this.rootNote.setParent(this.rootNote.getId());
+                //this.rootNote.setParent(this.rootNote.getId());
                 intent = new Intent(this, ActivityTest.class);
                 b = new Bundle();
                 b.putInt("idnote", this.rootNote.getId());
@@ -220,6 +200,8 @@ public class MainApplication extends AppCompatActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        clickOnButtonBack (this.rootNote.getParent());
+        clickOnButtonBack(this.rootNote.getId());
     }
+
+
 }
