@@ -143,8 +143,8 @@ public class ActivityTest extends AppCompatActivity {
                 anr.setCorrect(true);
                 buttonTest1 = new ButtonTest(this, anr);
                 buttonTest = new ButtonTest(this, new Answer(0, question.getId(), "Да", 0));
-                this.layoutAnswersbutton.addView(buttonTest1, layoutParams);
                 this.layoutAnswersbutton.addView(buttonTest, layoutParams);
+                this.layoutAnswersbutton.addView(buttonTest1, layoutParams);
             }
             buttonTest.setOnClickListener(new ButtonTestClickListener(question, this.buttonTestList));
             buttonTest1.setOnClickListener(new ButtonTestClickListener(question, this.buttonTestList));

@@ -6,7 +6,7 @@ import android.graphics.Color;
 import com.filenko.conspect.essence.Answer;
 
 public class ButtonTest extends androidx.appcompat.widget.AppCompatButton {
-    private Answer answer;
+    private final Answer answer;
     private boolean select = false;
 
     public ButtonTest(Context context, Answer answer) {
@@ -14,6 +14,7 @@ public class ButtonTest extends androidx.appcompat.widget.AppCompatButton {
         this.answer = answer;
         setText(this.answer.getAnswer());
         setBackgroundColor(Color.rgb(213, 213, 213)); // gray
+        setAllCaps(false);
 
     }
 
