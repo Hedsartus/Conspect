@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.daimajia.swipe.SimpleSwipeListener;
@@ -30,6 +31,7 @@ import com.filenko.conspect.essence.Answer;
 import com.filenko.conspect.essence.Question;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHolder> {
     private final DataBaseConnection db;
@@ -83,19 +85,21 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
                 if(this.question.getId() != 0) {
                     AnswerAdapter adapter = (AnswerAdapter) recyclerViewSection.getAdapter();
 
-                    if (this.question.getType() == 2) {
-                        if (this.question.getListAnswers().size() == 0) {
-                            adapter.addNewAnswer();
+                    if(adapter != null) {
+                        if (this.question.getType() == 2) {
+                            if (this.question.getListAnswers().size() == 0) {
+                                adapter.addNewAnswer();
+                            } else {
+                                Toast toast = Toast.makeText(this.recyclerViewSection.getContext(),
+                                        "Нельзя добавить больше одного ответа в тип вопроса - верно или нет!", Toast.LENGTH_LONG);
+                                toast.show();
+                            }
                         } else {
-                            Toast toast = Toast.makeText(this.recyclerViewSection.getContext(),
-                                    "Нельзя добавить больше одного ответа в тип вопроса - верно или нет!", Toast.LENGTH_LONG);
-                            toast.show();
+                            adapter.addNewAnswer();
                         }
-                    } else {
-                        adapter.addNewAnswer();
-                    }
 
-                    this.teCountAnswers.setText("Ответов: " + this.question.getListAnswers().size());
+                        this.teCountAnswers.setText("Ответов: " + this.question.getListAnswers().size());
+                    }
                 } else {
                     Toast toast = Toast.makeText(this.recyclerViewSection.getContext(),
                             "Сначала сохраните вопрос!!!", Toast.LENGTH_LONG);
@@ -261,7 +265,8 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
 //        }
 
         holder.buttondelete.setOnClickListener(view -> {
-            //mItemManger.removeShownLayouts(holder.layoutQuestionItem);
+            AlertDialog diaBox = askDelete(holder, position);
+            diaBox.show();
         });
     }
 
@@ -275,4 +280,53 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
         return R.id.layoutQuestionItem;
     }
 
+    private boolean deleteQuestion(int id) {
+        SQLiteDatabase database = this.db.getWritableDatabase();
+        List<Integer> listAnswersId = new ArrayList<>();
+
+        try (Cursor query = database.rawQuery(
+                "SELECT * FROM ANSWER WHERE idquestion = " + id + ";", null)) {
+            while (query.moveToNext()) {
+                listAnswersId.add(query.getInt(0));
+            }
+
+        }
+
+        for(Integer val : listAnswersId) {
+            if(!deleteAnswer(val)) {
+                return false;
+            }
+        }
+
+        int delCount = database.delete("QUESTIONS", "_id =" + id, null);
+
+        return delCount > 0;
+    }
+
+    private boolean deleteAnswer(int id) {
+        SQLiteDatabase database = this.db.getWritableDatabase();
+        int delCount = database.delete("ANSWER", "_id =" + id, null);
+
+        return delCount > 0;
+    }
+
+    private AlertDialog askDelete(QuestionAdapter.ViewHolder holder, int position) {
+        final AlertDialog alertDialog = new AlertDialog.Builder(this.ctx)
+                //set message, title, and icon
+                .setTitle("Удаление вопроса")
+                .setMessage("Удалить вопрос с ответами?")
+                .setIcon(R.drawable.delete)
+                .setPositiveButton("Да", (dialog, whichButton) -> {
+                    int index = holder.question.getId();
+                    if(index>0) {
+                        if (deleteQuestion(index)) {
+                            this.objects.remove(position);
+                            this.notifyDataSetChanged();
+                        }
+                    }
+                    dialog.dismiss();
+                }).setNegativeButton("Отмена", (dialog, which) -> dialog.dismiss())
+                .create();
+        return alertDialog;
+    }
 }

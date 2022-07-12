@@ -29,7 +29,7 @@
                         android:textColor="@color/colorPrimary"
                         android:textStyle="bold"
                         android:textSize="17sp"
-                        android:textAlignment="center"
+                        android:textAlignment="textStart"
                         android:text="Вопрос" />
                 </LinearLayout>
 

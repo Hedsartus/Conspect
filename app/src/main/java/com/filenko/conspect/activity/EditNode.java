@@ -4,10 +4,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -19,9 +21,12 @@ import com.filenko.conspect.essence.Note;
 
 import java.util.Objects;
 
+import jp.wasabeef.richeditor.RichEditor;
+
 public class EditNode extends AppCompatActivity {
     private final Note note = new Note();
     private DataBaseConnection dbconn;
+    private RichEditor mEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +37,57 @@ public class EditNode extends AppCompatActivity {
 
         this.dbconn = new DataBaseConnection(this);
 
+
+        mEditor = findViewById(R.id.editor);
+        mEditor.setEditorHeight(200);
+        mEditor.setEditorFontSize(18);
+        mEditor.setEditorFontColor(Color.DKGRAY);
+
+        mEditor.setPadding(10, 10, 10, 10);
+        mEditor.setPlaceholder("Insert text here...");
+
+        findViewById(R.id.action_undo).setOnClickListener(v -> mEditor.undo());
+        findViewById(R.id.action_redo).setOnClickListener(v -> mEditor.redo());
+
+        findViewById(R.id.action_bold).setOnClickListener(v -> mEditor.setBold());
+
+        findViewById(R.id.action_italic).setOnClickListener(v -> mEditor.setItalic());
+
+        findViewById(R.id.action_subscript).setOnClickListener(v -> mEditor.setSubscript());
+
+        findViewById(R.id.action_superscript).setOnClickListener(v -> mEditor.setSuperscript());
+
+        findViewById(R.id.action_strikethrough).setOnClickListener(v -> mEditor.setStrikeThrough());
+
+        findViewById(R.id.action_underline).setOnClickListener(v -> mEditor.setUnderline());
+
+        findViewById(R.id.action_txt_color).setOnClickListener(new View.OnClickListener() {
+            private boolean isChanged;
+
+            @Override
+            public void onClick(View v) {
+                mEditor.setTextColor(isChanged ? Color.BLUE : Color.RED);
+                isChanged = !isChanged;
+            }
+        });
+
+        findViewById(R.id.action_bg_color).setOnClickListener(new View.OnClickListener() {
+            private boolean isChanged;
+
+            @Override
+            public void onClick(View v) {
+                mEditor.setTextBackgroundColor(isChanged ? Color.TRANSPARENT : Color.YELLOW);
+                isChanged = !isChanged;
+            }
+        });
+
+        findViewById(R.id.action_indent).setOnClickListener(v -> mEditor.setIndent());
+        findViewById(R.id.action_outdent).setOnClickListener(v -> mEditor.setOutdent());
+        findViewById(R.id.action_align_left).setOnClickListener(v -> mEditor.setAlignLeft());
+        findViewById(R.id.action_align_center).setOnClickListener(v -> mEditor.setAlignCenter());
+        findViewById(R.id.action_align_right).setOnClickListener(v -> mEditor.setAlignRight());
+        findViewById(R.id.action_insert_bullets).setOnClickListener(v -> mEditor.setBullets());
+        findViewById(R.id.action_insert_numbers).setOnClickListener(v -> mEditor.setNumbers());
 
         Bundle bundle = getIntent().getExtras();
         if(bundle!= null && bundle.getInt("key") > 0) {
@@ -76,7 +132,7 @@ public class EditNode extends AppCompatActivity {
         dataValues.put("parent", this.note.getParent());
         dataValues.put("name", this.note.getName());
         dataValues.put("description", this.note.getDescription());
-        dataValues.put("html", "");
+        dataValues.put("html", this.note.getHtml());
 
         if (note.getId() > 0) {
             database.update("NOTES", dataValues, "_id = ?",
@@ -93,14 +149,13 @@ public class EditNode extends AppCompatActivity {
     private void viewToEssence () {
         this.note.setName(((EditText)findViewById(R.id.nodesName)).getText().toString());
         this.note.setDescription(((EditText)findViewById(R.id.etDescription)).getText().toString());
+        this.note.setHtml(mEditor.getHtml());
     }
 
     private void getDataFromDatabase (int id) {
         try {
             SQLiteDatabase db = this.dbconn.getReadableDatabase();
-
             String sql = "SELECT * FROM NOTES WHERE _id = "+id+";";
-
             Cursor query = db.rawQuery(sql, null);
 
             while(query.moveToNext()){
@@ -109,7 +164,6 @@ public class EditNode extends AppCompatActivity {
                 this.note.setName(query.getString(3));
                 this.note.setDescription(query.getString(4));
                 this.note.setHtml(query.getString(5));
-
             }
             query.close();
             db.close();
@@ -123,6 +177,7 @@ public class EditNode extends AppCompatActivity {
     private void setFields () {
         ((EditText)findViewById(R.id.nodesName)).setText(this.note.getName());
         ((EditText)findViewById(R.id.etDescription)).setText(this.note.getDescription());
+        mEditor.setHtml(this.note.getHtml());
     }
 
     @Override

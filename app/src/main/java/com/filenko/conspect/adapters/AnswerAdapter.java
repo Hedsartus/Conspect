@@ -2,6 +2,7 @@ package com.filenko.conspect.adapters;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -14,10 +15,9 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.filenko.conspect.R;
 import com.filenko.conspect.db.DataBaseConnection;
@@ -46,7 +46,6 @@ public class AnswerAdapter extends RecyclerSwipeAdapter<AnswerAdapter.ViewHolder
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         private Answer answer;
-        private SwipeLayout layoutAnswerItem;
         final EditText answerTitle;
         final CheckBox checkBox;
         final ImageView buttondeleteanswer;
@@ -54,7 +53,6 @@ public class AnswerAdapter extends RecyclerSwipeAdapter<AnswerAdapter.ViewHolder
 
         ViewHolder(View view){
             super(view);
-            layoutAnswerItem = view.findViewById(R.id.layoutAnswerItem);
             checkBox = view.findViewById(R.id.checkboxAnswer);
             answerTitle = view.findViewById(R.id.item_answer_text);
             btnSaveAnswer = view.findViewById(R.id.btnSaveAnswer);
@@ -88,7 +86,8 @@ public class AnswerAdapter extends RecyclerSwipeAdapter<AnswerAdapter.ViewHolder
                 btnEnabled(btnSaveAnswer, !answerTitle.getText().toString().equals(""));
             });
 
-            btnEnabled(btnSaveAnswer, false);
+
+
         }
 
         public void setAnswer (Answer answer) {
@@ -96,7 +95,10 @@ public class AnswerAdapter extends RecyclerSwipeAdapter<AnswerAdapter.ViewHolder
             if(this.answer!= null) {
                 this.answerTitle.setText(this.answer.getAnswer());
                 this.checkBox.setChecked(this.answer.isCorrect());
-                btnEnabled (btnSaveAnswer, false);
+                if(question.getType() == 1) {
+                    btnEnabled(btnSaveAnswer, false);
+                }
+
             }
         }
 
@@ -159,7 +161,8 @@ public class AnswerAdapter extends RecyclerSwipeAdapter<AnswerAdapter.ViewHolder
         if(this.question.getType() == 2) holder.answerTitle.setEnabled(false);
 
         holder.buttondeleteanswer.setOnClickListener(view -> {
-            //mItemManger.removeShownLayouts(holder.layoutAnswerItem);
+            AlertDialog diaBox = askDelete(holder, position);
+            diaBox.show();
         });
     }
 
@@ -171,5 +174,32 @@ public class AnswerAdapter extends RecyclerSwipeAdapter<AnswerAdapter.ViewHolder
     @Override
     public int getSwipeLayoutResourceId(int position) {
         return R.id.layoutAnswerItem;
+    }
+
+    private boolean deleteAnswer(int id) {
+        SQLiteDatabase database = this.db.getWritableDatabase();
+        int delCount = database.delete("ANSWER", "_id =" + id, null);
+
+        return delCount > 0;
+    }
+
+    private AlertDialog askDelete(AnswerAdapter.ViewHolder holder, int position) {
+        final AlertDialog alertDialog = new AlertDialog.Builder(this.ctx)
+                //set message, title, and icon
+                .setTitle("Удаление ответа")
+                .setMessage("Удалить ответ?")
+                .setIcon(R.drawable.delete)
+                .setPositiveButton("Да", (dialog, whichButton) -> {
+                    int index = holder.answer.getId();
+                    if(index>0) {
+                        if (deleteAnswer(index)) {
+                            this.objects.remove(position);
+                            this.notifyDataSetChanged();
+                        }
+                    }
+                    dialog.dismiss();
+                }).setNegativeButton("Отмена", (dialog, which) -> dialog.dismiss())
+                .create();
+        return alertDialog;
     }
 }

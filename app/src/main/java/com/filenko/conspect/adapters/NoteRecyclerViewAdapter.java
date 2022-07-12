@@ -5,24 +5,25 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.filenko.conspect.R;
 import com.filenko.conspect.activity.EditNode;
+import com.filenko.conspect.activity.EditNote;
 import com.filenko.conspect.db.DataBaseConnection;
 import com.filenko.conspect.essence.Note;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerViewAdapter.ViewHolder> {
     private final DataBaseConnection db;
@@ -30,6 +31,7 @@ public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerVi
     private final LayoutInflater lInflater;
     private final ArrayList<Note> objects = new ArrayList<>();
     public OnClickListener onClickListener;
+    private Note rootNote;
     public interface OnClickListener {
         void onOpenNoteViewClick(View view, int position);
     }
@@ -38,7 +40,16 @@ public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerVi
         this.db = db;
         this.ctx = ctx;
         this.lInflater = LayoutInflater.from(ctx);
+        this.rootNote = new Note();
         getRootNotesFromDataBase ();
+    }
+
+    public Note getRootNote() {
+        return this.rootNote;
+    }
+
+    public void setRootNote(Note note) {
+        this.rootNote = note;
     }
 
     @Override
@@ -67,15 +78,28 @@ public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerVi
         holder.noteDescription.setText(note.getDescription());
 
         holder.buttonEditSwipe.setOnClickListener(view -> {
-            Intent intent = new Intent(this.ctx, EditNode.class);
-            Bundle b = new Bundle();
-            b.putInt("key", note.getId());
-            intent.putExtras(b);
-            this.ctx.startActivity(intent);
+            if(note.getType() == 1) {
+                Intent intent = new Intent(this.ctx, EditNode.class);
+                Bundle b = new Bundle();
+                b.putInt("key", note.getId());
+                intent.putExtras(b);
+                this.ctx.startActivity(intent);
+            } else {
+                Intent intent = new Intent(this.ctx, EditNote.class);
+                Bundle b = new Bundle();
+                b.putInt("key", note.getId());
+                intent.putExtras(b);
+                this.ctx.startActivity(intent);
+            }
         });
 
         holder.layoutView.setOnClickListener(v -> {
             onClickListener.onOpenNoteViewClick(v, position);
+        });
+
+        holder.buttonDeleteSwipe.setOnClickListener(v -> {
+            AlertDialog diaBox = noteDelete(position);
+            diaBox.show();
         });
     }
 
@@ -124,7 +148,7 @@ public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerVi
         Runnable r = () -> {
             for (Note n : this.objects) {
                 if(n.getType() == 1) {
-                    n.setHtml(loadTree(n.getId()));
+                    n.setHtml(getShortSum(loadTree(n.getId())));
                 }
             }
         };
@@ -132,7 +156,7 @@ public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerVi
         myThread.start();
     }
 
-    private String loadTree(int id) {
+    private int loadTree(int id) {
         SQLiteDatabase database = this.db.getReadableDatabase();
         int count;
 
@@ -142,7 +166,20 @@ public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerVi
             count = q.getCount();
         }
 
-        return getShortSum (count);
+        return count;
+    }
+
+    private int loadTreeCountQuestions(int id) {
+        SQLiteDatabase database = this.db.getReadableDatabase();
+        int count;
+
+        String sql = "SELECT _id FROM QUESTIONS WHERE idnote = "+ id +";";
+
+        try (Cursor q = database.rawQuery(sql, null)) {
+            count = q.getCount();
+        }
+
+        return count;
     }
 
     private String getShortSum (int val) {
@@ -151,6 +188,22 @@ public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerVi
             return divide+"К";
         } else {
             return val+"";
+        }
+    }
+
+    /** Get Note from database by id */
+    public void getNoteFromDataBaseById (int id) {
+        if(id > 0) {
+            SQLiteDatabase database = this.db.getReadableDatabase();
+            try (Cursor query = database.rawQuery("SELECT * FROM NOTES WHERE _id = " + id + ";", null)) {
+                while (query.moveToNext()) {
+                    this.rootNote.setId(id);
+                    this.rootNote.setType(query.getInt(1));
+                    this.rootNote.setParent(query.getInt(2));
+                    this.rootNote.setName(query.getString(3));
+                    this.rootNote.setDescription(query.getString(4));
+                }
+            }
         }
     }
 
@@ -176,7 +229,7 @@ public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerVi
         public final TextView sizeChild;
         public final ImageView buttonDeleteSwipe;
         public final RelativeLayout layoutView;
-        private ImageView buttonEditSwipe;
+        public final ImageView buttonEditSwipe;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -189,4 +242,77 @@ public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerVi
             this.buttonEditSwipe = itemView.findViewById(R.id.buttonEditSwipe);
         }
     }
+
+    private AlertDialog noteDelete(int position) {
+        Note note = (Note) getItem(position);
+        String catNote = note.getType() == 1 ? "каталога" : "карточки";
+        String dangerString;
+        if(note.getType() == 1) {
+            int countNoteChild = loadTree(note.getId());
+            dangerString = "Каталог содержит "+countNoteChild+" файла, удалить все?";
+        } else {
+            int countAuestionsChild = loadTreeCountQuestions(note.getId());
+            dangerString = "Карточка содержит "+countAuestionsChild+" вопроса, удалить все?";
+        }
+
+
+
+
+        final AlertDialog alertDialog = new AlertDialog.Builder(this.ctx)
+                //set message, title, and icon
+                .setTitle("Удаление "+catNote)
+                .setMessage(dangerString)
+                .setIcon(R.drawable.delete)
+                .setPositiveButton("Да", (dialog, whichButton) -> {
+                    int index = note.getId();
+                    if(index>0) {
+                        if (deleteNote(index)) {
+                            this.objects.remove(position);
+                            this.notifyDataSetChanged();
+                        }
+                    }
+                    dialog.dismiss();
+                }).setNegativeButton("Отмена", (dialog, which) -> dialog.dismiss())
+                .create();
+        return alertDialog;
+    }
+
+    private boolean deleteNote(int id) {
+        SQLiteDatabase database = this.db.getWritableDatabase();
+        int delCount = database.delete("NOTES", "_id =" + id, null);
+
+        return delCount > 0;
+    }
+
+    private boolean deleteQuestion(int id) {
+        SQLiteDatabase database = this.db.getWritableDatabase();
+        List<Integer> listAnswersId = new ArrayList<>();
+
+        try (Cursor query = database.rawQuery(
+                "SELECT * FROM ANSWER WHERE idquestion = " + id + ";", null)) {
+            while (query.moveToNext()) {
+                listAnswersId.add(query.getInt(0));
+            }
+
+        }
+
+        for(Integer val : listAnswersId) {
+            if(!deleteAnswer(val)) {
+                return false;
+            }
+        }
+
+        int delCount = database.delete("QUESTIONS", "_id =" + id, null);
+
+        return delCount > 0;
+    }
+
+    private boolean deleteAnswer(int id) {
+        SQLiteDatabase database = this.db.getWritableDatabase();
+        int delCount = database.delete("ANSWER", "_id =" + id, null);
+
+        return delCount > 0;
+    }
+
+
 }

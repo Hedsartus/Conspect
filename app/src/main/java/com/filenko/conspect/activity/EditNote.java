@@ -1,6 +1,5 @@
 package com.filenko.conspect.activity;
 
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;

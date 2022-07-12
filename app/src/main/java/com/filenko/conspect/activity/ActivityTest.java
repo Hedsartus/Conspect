@@ -206,7 +206,7 @@ public class ActivityTest extends AppCompatActivity {
         } finally {
             //checkQuestionList(this.question);
             if(this.question.size()>0) {
-                Collections.shuffle(list);
+                Collections.shuffle(this.question);
                 loadAnswers(this.question.get(count));
                 setTitle("Вопрос 1 из " + this.question.size());
             }
