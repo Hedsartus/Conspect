@@ -8,13 +8,15 @@ public class Question {
     private int type; // 1 - множественный, 2 - да/нет
     private int idNote;
     private String title;
+    private boolean correct;
     private final List<Answer> answers = new ArrayList<>();
 
-    public Question(int id, int type, int idNote, String title) {
+    public Question(int id, int type, int idNote, String title, int correct) {
         this.id = id;
         this.type = type;
         this.idNote = idNote;
         this.title = title;
+        this.correct = correct > 0;
     }
 
     public Question() {
@@ -54,6 +56,14 @@ public class Question {
 
     public String getTitle() {
         return title;
+    }
+
+    public boolean getCorrect() {
+        return correct;
+    }
+
+    public void setCorrect(boolean correct) {
+        this.correct = correct;
     }
 
     public Answer getAnswer(int id) {

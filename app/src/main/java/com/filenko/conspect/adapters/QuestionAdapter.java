@@ -1,10 +1,8 @@
 package com.filenko.conspect.adapters;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -22,7 +20,6 @@ import android.widget.ToggleButton;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.daimajia.swipe.SimpleSwipeListener;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.filenko.conspect.R;
@@ -145,17 +142,12 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
             if(checkQuestion(question.getTitle())) {
                 SQLiteDatabase database = db.getWritableDatabase();
 
-                ContentValues dataValues = new ContentValues();
-                dataValues.put("idnote", question.getIdNote());
-                dataValues.put("type", question.getType());
-                dataValues.put("title", question.getTitle());
-
                 if (question.getId() > 0) {
-                    database.update("QUESTIONS", dataValues, "_id = ?",
-                            new String[]{String.valueOf(question.getId())});
+                    db.updateQuestion(question, database);
                 } else {
-                    question.setId((int) database.insert("QUESTIONS", null, dataValues));
+                    question.setId(db.insertQuestion(question, database));
                 }
+                database.close();
             } else {
                 Toast toast = Toast.makeText(this.recyclerViewSection.getContext(),
                         "Нельзя сохранить пустой вопрос!", Toast.LENGTH_LONG);
@@ -210,7 +202,8 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
                                 query.getInt(0),
                                 query.getInt(1),
                                 query.getInt(2),
-                                query.getString(3))
+                                query.getString(3),
+                                query.getInt(4))
                 );
             }
         } finally {
@@ -223,6 +216,7 @@ public class QuestionAdapter extends RecyclerSwipeAdapter<QuestionAdapter.ViewHo
         for(Question q : this.objects) {
             loadAnswers(q, database);
         }
+        database.close();
     }
 
     private void loadAnswers(Question question, SQLiteDatabase database) {

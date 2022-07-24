@@ -1,13 +1,18 @@
 package com.filenko.conspect.essence;
 
 
-public class Note {
+import java.util.ArrayList;
+import java.util.List;
+
+public class Note implements Comparable<Note> {
     private int id;
     private int type; // (1) folder or (2) note
     private int parent;
     private String name;
     private String description;
     private String html;
+    private final List<Note> listChild = new ArrayList<>();
+    private final List<Question> questionsList = new ArrayList<>();
 
     public Note(int id, int type, int parent, String name, String description, String html) {
         this.id = id;
@@ -75,6 +80,24 @@ public class Note {
         return html;
     }
 
+    public void addChild(Note note) {
+        note.setParent(this.getId());
+        this.listChild.add(note);
+    }
+
+    public List<Question> getListQuestion() {
+        return this.questionsList;
+    }
+
+    public void addChild(Question question) {
+        question.setIdNote(this.getId());
+        this.questionsList.add(question);
+    }
+
+    public List<Note> getListChild() {
+        return this.listChild;
+    }
+
     @Override
     public String toString() {
         return "Name = "+getName()+", id = "+getId()+", parent = "+getParent();
@@ -87,5 +110,10 @@ public class Note {
         this.name = null;
         this.description = null;
         this.html = null;
+    }
+
+    @Override
+    public int compareTo(Note o) {
+        return this.getName().compareTo(o.getName());
     }
 }

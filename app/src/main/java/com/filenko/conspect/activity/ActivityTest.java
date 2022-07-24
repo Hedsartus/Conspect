@@ -201,7 +201,8 @@ public class ActivityTest extends AppCompatActivity {
                                 q.getInt(0),
                                 q.getInt(1),
                                 q.getInt(2),
-                                q.getString(3)));
+                                q.getString(3),
+                                q.getInt(4)));
             }
         } finally {
             //checkQuestionList(this.question);

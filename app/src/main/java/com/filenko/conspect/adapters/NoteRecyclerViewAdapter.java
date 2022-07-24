@@ -63,14 +63,14 @@ public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerVi
         Note note = this.objects.get(position);
 
         if(note.getType() == 1) {
-            holder.itemImageViewIcon.setImageResource(R.drawable.directory2);
+            holder.itemImageViewIcon.setImageResource(R.drawable.file8);
             if(!note.getHtml().equals("0")) {
                 holder.sizeChild.setText(note.getHtml());
             } else {
                 holder.sizeChild.setText("");
             }
         } else {
-            holder.itemImageViewIcon.setImageResource(R.drawable.file2);
+            holder.itemImageViewIcon.setImageResource(R.drawable.file6);
             holder.sizeChild.setText("");
         }
 
@@ -111,7 +111,7 @@ public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerVi
         if(idParent >= 0) {
             this.objects.clear();
 
-            String sql = "SELECT * FROM NOTES WHERE parent = " + idParent + " ORDER BY type, name;";
+            String sql = "SELECT * FROM NOTES WHERE parent = " + idParent + " ORDER BY name;";
 
             SQLiteDatabase database = this.db.getReadableDatabase();
             try (Cursor query = database.rawQuery(sql, null)) {
@@ -120,7 +120,7 @@ public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerVi
                             query.getInt(1),
                             query.getInt(2),
                             query.getString(3),
-                            query.getString(4), null));
+                            query.getString(4), "0"));
                 }
                 this.notifyDataSetChanged();
             } finally {
@@ -131,7 +131,7 @@ public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerVi
 
     public void getRootNotesFromDataBase () {
         SQLiteDatabase database = this.db.getReadableDatabase();
-        try (Cursor query = database.rawQuery("SELECT * FROM NOTES WHERE parent = 0 ORDER BY type, name;", null)) {
+        try (Cursor query = database.rawQuery("SELECT * FROM NOTES WHERE parent = 0 ORDER BY name;", null)) {
             while (query.moveToNext()) {
                 this.objects.add(new Note(query.getInt(0),
                         query.getInt(1),
