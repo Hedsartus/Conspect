@@ -179,14 +179,10 @@ public class MainApplication extends AppCompatActivity {
                 break;
 
             //Сохранить ветку
-            case 7:
-                exportJsonFile();
-                break;
+            case 7: exportJsonFile(); break;
 
             //Загрузить ветку
-            case 8:
-                onBrowse();
-                break;
+            case 8: onBrowse(); break;
         }
 
         return super.onOptionsItemSelected(item);
