@@ -89,4 +89,6 @@ public class DataBaseConnection extends SQLiteOpenHelper {
             db.execSQL("ALTER TABLE QUESTIONS ADD COLUMN correct INTEGER DEFAULT 0");
         }
     }
+
+
 }

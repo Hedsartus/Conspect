@@ -1,8 +1,12 @@
 package com.filenko.conspect.classes;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.OpenableColumns;
 
 import androidx.annotation.RequiresApi;
 
@@ -45,7 +49,7 @@ public class FilesWorker {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public static String readStringJson(String nameFile, Context ctx) {
+    public static String readStringJson(String nameFile) {
         try {
             JSONParser parser = new JSONParser();
             JSONArray jsonObject = (JSONArray) parser.parse(new FileReader(nameFile));
@@ -104,5 +108,28 @@ public class FilesWorker {
             e.printStackTrace();
             return false;
         }
+    }
+
+    @SuppressLint("Range")
+    public static String getFileName(Uri contentUri, Context context) {
+        String result = null;
+        if (contentUri.getScheme() != null && contentUri.getScheme().equals("content")) {
+            try (Cursor cursor = context.getContentResolver().query(contentUri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            }
+        }
+        if (result == null) {
+            result = contentUri.getPath();
+            if (result == null) {
+                return null;
+            }
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+        return result;
     }
 }

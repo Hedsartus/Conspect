@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.filenko.conspect.R;
-import com.filenko.conspect.activity.EditNode;
 import com.filenko.conspect.activity.EditNote;
 import com.filenko.conspect.db.DataBaseConnection;
 import com.filenko.conspect.essence.Note;
@@ -78,23 +77,23 @@ public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerVi
         holder.noteDescription.setText(note.getDescription());
 
         holder.buttonEditSwipe.setOnClickListener(view -> {
-            if(note.getType() == 1) {
-                Intent intent = new Intent(this.ctx, EditNode.class);
-                Bundle b = new Bundle();
-                b.putInt("key", note.getId());
-                intent.putExtras(b);
-                this.ctx.startActivity(intent);
-            } else {
-                Intent intent = new Intent(this.ctx, EditNote.class);
-                Bundle b = new Bundle();
-                b.putInt("key", note.getId());
-                intent.putExtras(b);
-                this.ctx.startActivity(intent);
-            }
+            Intent intent = new Intent(this.ctx, EditNote.class);
+            Bundle b = new Bundle();
+            b.putInt("key", note.getId());
+            intent.putExtras(b);
+            this.ctx.startActivity(intent);
         });
 
         holder.layoutView.setOnClickListener(v -> {
             onClickListener.onOpenNoteViewClick(v, position);
+        });
+
+        holder.buttonAddSwipe.setOnClickListener(v -> {
+            Intent intent = new Intent(this.ctx, EditNote.class);
+            Bundle b = new Bundle();
+            b.putInt("parent", note.getId());
+            intent.putExtras(b);
+            this.ctx.startActivity(intent);
         });
 
         holder.buttonDeleteSwipe.setOnClickListener(v -> {
@@ -230,6 +229,7 @@ public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerVi
         public final ImageView buttonDeleteSwipe;
         public final RelativeLayout layoutView;
         public final ImageView buttonEditSwipe;
+        public final ImageView buttonAddSwipe;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -240,6 +240,11 @@ public class NoteRecyclerViewAdapter extends RecyclerSwipeAdapter<NoteRecyclerVi
             this.layoutView = itemView.findViewById(R.id.layoutView);
             this.buttonDeleteSwipe = itemView.findViewById(R.id.buttonDeleteSwipe);
             this.buttonEditSwipe = itemView.findViewById(R.id.buttonEditSwipe);
+            this.buttonAddSwipe = itemView.findViewById(R.id.buttonAddSwipe);
+        }
+
+        public Note getNote() {
+            return this.note;
         }
     }
 

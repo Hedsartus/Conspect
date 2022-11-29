@@ -5,11 +5,9 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.OpenableColumns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -22,11 +20,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.filenko.conspect.activity.ActivityTest;
-import com.filenko.conspect.activity.EditNode;
 import com.filenko.conspect.activity.EditNote;
 import com.filenko.conspect.activity.ReadAll;
 import com.filenko.conspect.adapters.NoteRecyclerViewAdapter;
 import com.filenko.conspect.classes.FilesWorker;
+import com.filenko.conspect.common.IntentStart;
+import com.filenko.conspect.common.RootDirectory;
 import com.filenko.conspect.db.DataBaseConnection;
 import com.filenko.conspect.essence.Answer;
 import com.filenko.conspect.essence.Note;
@@ -44,6 +43,7 @@ public class MainApplication extends AppCompatActivity {
     private static final int ACTIVITY_CHOOSE_FILE = 787;
     private NoteRecyclerViewAdapter adapter;
     private String tempPath;
+    private static final String TAG = "==MainApplication==";
 
     @SuppressLint("SetWorldReadable")
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -52,32 +52,35 @@ public class MainApplication extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        RootDirectory rootDirectory = new RootDirectory(this.getApplicationContext());
+
+
         this.db = new DataBaseConnection(this);
 
         RecyclerView listViewNote = findViewById(R.id.listViewNote);
         listViewNote.setLayoutManager(new LinearLayoutManager(this));
 
         DividerItemDecoration itemDecorator = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
-        itemDecorator.setDrawable(ContextCompat.getDrawable(this, R.drawable.divider1));
+        itemDecorator.setDrawable(Objects.requireNonNull(ContextCompat.getDrawable(this, R.drawable.divider1)));
         listViewNote.addItemDecoration(itemDecorator);
 
-        this.adapter = new NoteRecyclerViewAdapter(db,this);
+        this.adapter = new NoteRecyclerViewAdapter(db, this);
         listViewNote.setAdapter(this.adapter);
 
         this.adapter.setOnClickListener((view, position) -> {
-            clickOnListView (position);
+            clickOnListView(position);
         });
 
     }
 
     @Override
     public boolean onSupportNavigateUp() {
-        clickOnButtonBack (this.adapter.getRootNote().getParent());
+        clickOnButtonBack(this.adapter.getRootNote().getParent());
         return true;
     }
 
-    private void clickOnButtonBack (int idParent) {
-        if(idParent> 0) {
+    private void clickOnButtonBack(int idParent) {
+        if (idParent > 0) {
             this.adapter.getNodesFromDataBaseByIdPrent(idParent);
             this.adapter.getNoteFromDataBaseById(idParent);
             setTitle(this.adapter.getRootNote().getName());
@@ -89,16 +92,14 @@ public class MainApplication extends AppCompatActivity {
         }
     }
 
-    private void clickOnListView (int position) {
+    private void clickOnListView(int position) {
         Note note = this.adapter.getItem(position);
         //1. Если нажимаю на папку - значит адаптер апдейт
         //2. Если нажимаю на заметку - значит открыть EditNote передать ID note
-        if(note.getType() == 2) {
-            Intent intent = new Intent(this, EditNote.class);
-            Bundle b = new Bundle();
-            b.putInt("key", note.getId());
-            intent.putExtras(b);
-            startActivity(intent);
+        if (note.getType() == 2) {
+            IntentStart.intentStartWithIntParam(
+                    this, EditNote.class,
+                    "key", note.getId());
         } else {
             this.adapter.getNodesFromDataBaseByIdPrent(note.getId());
             this.adapter.setRootNote(note);
@@ -108,11 +109,9 @@ public class MainApplication extends AppCompatActivity {
     }
 
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, 1, 0, "Добавить каталог");
-        menu.add(0, 2, 0, "Добавить карточку");
+        menu.add(0, 1, 0, "Добавить карточку");
         menu.add(0, 3, 0, "Тестирование");
         menu.add(0, 4, 0, "Сделать копию БД");
 //        menu.add(0, 5, 0, "Загрузить БД");
@@ -125,11 +124,11 @@ public class MainApplication extends AppCompatActivity {
 
 
     /**
-    1. Если нажимаем добавить каталог
-        - Отправляем на EditNode c параметром родителя
-    2. Если нажимаем добавить карточку
-        - Проверяем есть ли у папки parent если нет, то нет возможности добавить карточку
-        - Отправляем на Edit
+     * 1. Если нажимаем добавить каталог
+     * - Отправляем на EditNode c параметром родителя
+     * 2. Если нажимаем добавить карточку
+     * - Проверяем есть ли у папки parent если нет, то нет возможности добавить карточку
+     * - Отправляем на Edit
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -137,76 +136,62 @@ public class MainApplication extends AppCompatActivity {
         Intent intent;
         Bundle b;
         switch (item.getItemId()) {
-            case 1 :
-                intent = new Intent(this, EditNode.class);
-                b = new Bundle();
-                b.putInt("parent", this.adapter.getRootNote().getId());
-                intent.putExtras(b);
-                startActivity(intent);
+            case 1:
+                IntentStart.intentStartWithIntParam(
+                        this, EditNote.class,
+                        "parent", this.adapter.getRootNote().getId());
                 break;
-            case 2 :
-                if(this.adapter.getRootNote().getId()> 0) {
-                    intent = new Intent(this, EditNote.class);
-                    b = new Bundle();
-                    b.putInt("parent", this.adapter.getRootNote().getId());
-                    intent.putExtras(b);
-                    startActivity(intent);
-                } else {
-                    Toast toast = Toast.makeText(this,
-                            "Добавьте сначала каталог!", Toast.LENGTH_SHORT);
-                    toast.show();
-                }
+            case 3:
+                IntentStart.intentStartWithIntParam(
+                        this, ActivityTest.class,
+                        "idnote", this.adapter.getRootNote().getId());
                 break;
-            case 3 :
-                intent = new Intent(this, ActivityTest.class);
-                b = new Bundle();
-                b.putInt("idnote", this.adapter.getRootNote().getId());
-                intent.putExtras(b);
-                startActivity(intent);
-                break;
-            case 4 :
+            case 4:
                 copyDataBase();
                 break;
             case 5:
                 //loadDataBase();
                 break;
             case 6:
-                intent = new Intent(this, ReadAll.class);
-                b = new Bundle();
-                b.putInt("idnote", this.adapter.getRootNote().getId());
-                intent.putExtras(b);
-                startActivity(intent);
+                IntentStart.intentStartWithIntParam(
+                        this, ReadAll.class,
+                        "idnote", this.adapter.getRootNote().getId());
                 break;
 
             //Сохранить ветку
-            case 7: exportJsonFile(); break;
+            case 7:
+                exportJsonFile();
+                break;
 
             //Загрузить ветку
-            case 8: onBrowse(); break;
+            case 8:
+                onBrowse();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void exportJsonFile() {
         String outFilePath =
                 Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_DOCUMENTS) +"/Conspect/";
+                        Environment.DIRECTORY_DOCUMENTS) + "/Conspect/";
 
         File fPath = new File(outFilePath);
-        if(!fPath.exists()) {
+        if (!fPath.exists()) {
             fPath.mkdir();
         }
 
-        String outFileName =  this.adapter.getRootNote().getName()+".json";
+        String outFileName = this.adapter.getRootNote().getName() + ".json";
         SQLiteDatabase database = this.db.getReadableDatabase();
         List<Note> listNote = loadNotesFromDatabase(this.adapter.getRootNote().getId(), database);
         loadQuestions(listNote, database);
         database.close();
 
         String json = FilesWorker.listToJson(listNote);
-        FilesWorker.writeString(json, outFilePath+outFileName);
+        FilesWorker.writeString(json, outFilePath + outFileName);
     }
 
     @Override
@@ -215,35 +200,35 @@ public class MainApplication extends AppCompatActivity {
         clickOnButtonBack(this.adapter.getRootNote().getId());
     }
 
-    private void downloadNotes (List<Note> listNote) {
+    private void downloadNotes(List<Note> listNote) {
         SQLiteDatabase database = this.db.getReadableDatabase();
         Map<Integer, Integer> idOldNewNote = new HashMap<>();
-        for(int i = 0; i < listNote.size(); i++) {
+        for (int i = 0; i < listNote.size(); i++) {
             Note note = listNote.get(i);
-            if(i == 0) {
+            if (i == 0) {
                 note.setParent(this.adapter.getRootNote().getId());
                 idOldNewNote.put(note.getId(), this.db.insertNote(note, database));
 
-                for(Question question : note.getListQuestion()) {
+                for (Question question : note.getListQuestion()) {
                     question.setIdNote(idOldNewNote.get(note.getId()));
                     question.setId(this.db.insertQuestion(question, database));
 
-                    for(Answer answer : question.getListAnswers()) {
+                    for (Answer answer : question.getListAnswers()) {
                         answer.setIdQuestion(question.getId());
                         answer.setId(this.db.insertAnswer(answer, database));
                     }
                 }
 
             } else {
-                if(idOldNewNote.containsKey(note.getParent())) {
+                if (idOldNewNote.containsKey(note.getParent())) {
                     note.setParent(idOldNewNote.get(note.getParent()));
                     idOldNewNote.put(note.getId(), this.db.insertNote(note, database));
 
-                    for(Question question : note.getListQuestion()) {
+                    for (Question question : note.getListQuestion()) {
                         question.setIdNote(idOldNewNote.get(note.getId()));
                         question.setId(this.db.insertQuestion(question, database));
 
-                        for(Answer answer : question.getListAnswers()) {
+                        for (Answer answer : question.getListAnswers()) {
                             answer.setIdQuestion(question.getId());
                             answer.setId(this.db.insertAnswer(answer, database));
                         }
@@ -252,11 +237,11 @@ public class MainApplication extends AppCompatActivity {
                     note.setParent(this.adapter.getRootNote().getId());
                     idOldNewNote.put(note.getId(), this.db.insertNote(note, database));
 
-                    for(Question question : note.getListQuestion()) {
+                    for (Question question : note.getListQuestion()) {
                         question.setIdNote(idOldNewNote.get(note.getId()));
                         question.setId(this.db.insertQuestion(question, database));
 
-                        for(Answer answer : question.getListAnswers()) {
+                        for (Answer answer : question.getListAnswers()) {
                             answer.setIdQuestion(question.getId());
                             answer.setId(this.db.insertAnswer(answer, database));
                         }
@@ -269,8 +254,8 @@ public class MainApplication extends AppCompatActivity {
     }
 
     private void loadQuestions(List<Note> listNote, SQLiteDatabase database) {
-        for(Note note : listNote) {
-            String sql = "SELECT * FROM QUESTIONS WHERE idnote = "+note.getId();
+        for (Note note : listNote) {
+            String sql = "SELECT * FROM QUESTIONS WHERE idnote = " + note.getId();
             try (Cursor q = database.rawQuery(sql, null)) {
                 while (q.moveToNext()) {
                     Question question = new Question(
@@ -291,7 +276,7 @@ public class MainApplication extends AppCompatActivity {
 
         String sql = "WITH recursive " +
                 "  Parrent_Id(n) AS ( " +
-                "    VALUES("+id+") " +
+                "    VALUES(" + id + ") " +
                 "    UNION " +
                 "    SELECT _id FROM NOTES, Parrent_Id WHERE NOTES.parent = Parrent_Id.n) " +
                 "SELECT _id, type, parent, name, description, html FROM NOTES " +
@@ -349,11 +334,11 @@ public class MainApplication extends AppCompatActivity {
                 return;
             }
             String fileName = Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_DOCUMENTS)+"/Conspect/"+getFileName(uri);
-            String jsonJava = FilesWorker.readStringJson(fileName, this);
+                    Environment.DIRECTORY_DOCUMENTS) + "/Conspect/" + FilesWorker.getFileName(uri, this);
+            String jsonJava = FilesWorker.readStringJson(fileName);
             List<Note> listNote = FilesWorker.jsonToList(jsonJava, Note.class);
-            if(listNote != null) {
-                downloadNotes (listNote);
+            if (listNote != null) {
+                downloadNotes(listNote);
             }
 
         } else {
@@ -361,38 +346,15 @@ public class MainApplication extends AppCompatActivity {
         }
     }
 
-    @SuppressLint("Range")
-    public String getFileName(Uri contentUri) {
-        String result = null;
-        if (contentUri.getScheme() != null && contentUri.getScheme().equals("content")) {
-            try (Cursor cursor = getContentResolver().query(contentUri, null, null, null, null)) {
-                if (cursor != null && cursor.moveToFirst()) {
-                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-                }
-            }
-        }
-        if (result == null) {
-            result = contentUri.getPath();
-            if (result == null) {
-                return null;
-            }
-            int cut = result.lastIndexOf('/');
-            if (cut != -1) {
-                result = result.substring(cut + 1);
-            }
-        }
-        return result;
-    }
-
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void copyDataBase() {
         String inFileName = this.getDatabasePath("nodebase.db").getAbsolutePath();
         String outFiles = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOCUMENTS)+"/Database/nodebase.db";
+                Environment.DIRECTORY_DOCUMENTS) + "/Database/nodebase.db";
 
         boolean sdff = FilesWorker.copyFiles(inFileName, outFiles);
         //Log.d("--------------", "Копирование БД : "+sdff);
-        Toast toast = Toast.makeText(this,"Копирование БД : "+sdff, Toast.LENGTH_LONG);
+        Toast toast = Toast.makeText(this, "Копирование БД : " + sdff, Toast.LENGTH_LONG);
         toast.show();
     }
 
@@ -408,28 +370,4 @@ public class MainApplication extends AppCompatActivity {
 //        Toast toast = Toast.makeText(this,"Загрузка БД : "+sdff, Toast.LENGTH_LONG);
 //        toast.show();
 //    }
-
-    /** LoadJson */
-    class LoadJson extends AsyncTask<String, Void, Void> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-        }
-
-        @Override
-        protected Void doInBackground(String... params) {
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-
-        }
-    }
-
-
 }

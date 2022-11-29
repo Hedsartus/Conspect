@@ -13,6 +13,14 @@
         android:inputType="textMultiLine"
         android:hint="@string/hintTitle"/>
 
+    <EditText
+        android:id="@+id/etDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:gravity="left"
+        android:hint="Описание"/>
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
